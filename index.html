@@ -1,0 +1,862 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<title>九宮・流年分析｜流年・九星・合沖</title>
+<style>:root{
+  --bg:#0b0d12;--panel:#121621;--panel2:#171c28;--line:#283044;--text:#f3f6fb;--muted:#99a3b5;
+  --accent:#7aa2ff;--good:#5ed39a;--bad:#ff7c8f;--warn:#ffc766;--cyan:#65d4e8;--shadow:0 18px 48px rgba(0,0,0,.28);--radius:18px;--space:8px;--control-radius:10px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:radial-gradient(1100px 600px at 10% -10%,#17244a 0%,transparent 55%),var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","PingFang TC","Noto Sans TC",Segoe UI,sans-serif}
+button,input,select{font:inherit}
+button{cursor:pointer}
+.app{min-height:100vh;display:grid;grid-template-columns:230px 1fr}
+.sidebar{position:sticky;top:0;height:100vh;padding:22px 16px;border-right:1px solid var(--line);background:rgba(11,13,18,.84);backdrop-filter:blur(18px)}
+.brand{display:flex;gap:12px;align-items:center;padding:6px 8px 20px}
+.logo{width:42px;height:42px;border-radius:14px;display:grid;place-items:center;background:linear-gradient(135deg,#6f8fff,#8775ff);box-shadow:0 10px 30px rgba(122,162,255,.28);font-weight:800}
+.brand h1{font-size:15px;margin:0}
+.brand small{display:block;color:var(--muted);margin-top:3px;line-height:1.35}
+.nav{display:flex;flex-direction:column;gap:7px}
+.nav button{border:0;background:transparent;color:var(--muted);text-align:left;padding:11px 12px;border-radius:12px;display:flex;gap:10px;align-items:center}
+.nav button:hover,.nav button.active{color:var(--text);background:var(--panel2)}
+.sidebar-foot{position:absolute;bottom:18px;left:16px;right:16px;color:var(--muted);font-size:12px;line-height:1.5}
+.main{padding:28px 30px 50px;max-width:1420px;width:100%;margin:0 auto}
+.topbar{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;margin-bottom:22px}
+.topbar h2{margin:0 0 5px;font-size:28px}
+.topbar p{margin:0;color:var(--muted)}
+.actions{display:flex;gap:8px;flex-wrap:wrap}
+.btn{border:1px solid var(--line);background:var(--panel2);color:var(--text);padding:9px 13px;border-radius:11px}
+.btn:hover{filter:brightness(1.07)}
+.section{display:none}
+.section.active{display:block}
+.grid{display:grid;gap:14px}
+.g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.card{background:linear-gradient(180deg,rgba(23,28,40,.94),rgba(18,22,33,.96));border:1px solid var(--line);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow)}
+.card h3{margin:0 0 14px;font-size:16px}
+.sub{color:var(--muted);font-size:13px;line-height:1.55}
+.mini{font-size:12px;color:var(--muted)}
+.form{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:11px}
+.field{display:flex;flex-direction:column;gap:6px}
+.field label{font-size:12px;color:var(--muted)}
+input,select{width:100%;border:1px solid var(--line);background:#0e121b;color:var(--text);border-radius:10px;padding:10px 11px;outline:none}
+input:focus,select:focus{border-color:var(--accent)}
+.span2{grid-column:span 2}
+.branch-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.branch-card{padding:16px;border:1px solid var(--line);border-radius:16px;background:rgba(9,12,18,.52);text-align:center}
+.branch-card .lbl{color:var(--muted);font-size:12px}
+.branch-card .branch{font-size:34px;font-weight:800;line-height:1.2;margin-top:5px}
+.branch-card .animal{font-size:13px;color:#c7cfdd;margin-top:5px}
+.branch-card.unknown{border-style:dashed;opacity:.72}
+.branch-card.unknown .branch{font-size:24px;color:var(--muted)}
+.tags{display:flex;gap:7px;flex-wrap:wrap}
+.tag{font-size:12px;padding:5px 9px;border-radius:999px;border:1px solid var(--line);background:#101722}
+.tag.good{color:var(--good);border-color:rgba(94,211,154,.38)}
+.tag.bad{color:var(--bad);border-color:rgba(255,124,143,.40)}
+.tag.warn{color:var(--warn);border-color:rgba(255,199,102,.38)}
+.tag.info{color:var(--cyan);border-color:rgba(101,212,232,.38)}
+.relation-list{display:grid;gap:10px}
+.rel-item{padding:12px 13px;border:1px solid var(--line);border-radius:13px;background:#0f141e}
+.rel-head{display:flex;justify-content:space-between;gap:12px;align-items:center}
+.rel-head b{font-size:14px}
+.rel-desc{margin-top:7px;color:var(--muted);font-size:12px;line-height:1.55}
+.table-wrap{overflow:auto;border:1px solid var(--line);border-radius:14px}
+.tbl{width:100%;border-collapse:collapse;min-width:760px}
+.tbl th,.tbl td{padding:11px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+.tbl th{position:sticky;top:0;background:#111722;color:#bac4d4;font-size:12px;z-index:1}
+.tbl td{font-size:13px}
+.tbl tr:hover td{background:rgba(122,162,255,.035)}
+.notice{border:1px solid rgba(101,212,232,.22);background:rgba(101,212,232,.05);padding:12px 14px;border-radius:12px;color:#c8d8dc;font-size:13px;line-height:1.6}
+.auto-status{display:flex;align-items:center;gap:7px;color:var(--good);font-size:12px;min-height:20px}
+.auto-status::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor;box-shadow:0 0 12px currentColor}
+.auto-status.wait{color:var(--warn)}
+.auto-status.error{color:var(--bad)}
+.matrix{border-collapse:collapse;width:100%;min-width:780px}
+.matrix th,.matrix td{border:1px solid var(--line);padding:8px;text-align:center;font-size:12px}
+.matrix th{background:#111722}
+.matrix td{height:58px}
+.matrix .head{font-weight:700;font-size:16px}
+.matrix .self{background:rgba(122,162,255,.06)}
+.daystrip{display:grid;grid-template-columns:repeat(auto-fit,minmax(128px,1fr));gap:9px}
+.daybox{border:1px solid var(--line);background:#0f141e;border-radius:13px;padding:11px;min-height:96px}
+.daybox.today{box-shadow:inset 0 0 0 1px var(--accent)}
+.daybox b{font-size:16px}
+.daybox small{display:block;color:var(--muted);margin-top:4px}
+.daily-main{display:grid;grid-template-columns:minmax(320px,430px) minmax(0,1fr);gap:14px;align-items:start}
+.legend{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.legend-item{border:1px solid var(--line);border-radius:13px;padding:12px;background:#0f141e}
+.legend-item b{font-size:14px}
+.legend-item p{margin:7px 0 0;color:var(--muted);font-size:12px;line-height:1.5}
+.finance-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.finance-kpi{padding:14px;border:1px solid var(--line);border-radius:14px;background:#0f141e}
+.finance-kpi .k{font-size:12px;color:var(--muted)}
+.finance-kpi b{display:block;font-size:21px;margin-top:5px}
+.dual{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.signal-box{border:1px solid var(--line);border-radius:14px;background:#0f141e;padding:14px}
+.signal-box.goodbox{border-color:rgba(94,211,154,.28)}
+.signal-box.badbox{border-color:rgba(255,124,143,.30)}
+.signal-box h4{margin:0 0 10px;font-size:14px}
+.signal-list{display:grid;gap:8px}
+.signal{font-size:13px;line-height:1.6;padding:10px 11px;border-radius:10px;background:rgba(255,255,255,.025)}
+.mode-badge{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line);border-radius:999px;padding:6px 10px;font-size:12px}
+.mode-badge.full{color:var(--good);border-color:rgba(94,211,154,.35)}
+.mode-badge.base{color:var(--warn);border-color:rgba(255,199,102,.35)}
+.star-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.star-card{padding:16px;border:1px solid var(--line);border-radius:16px;background:#0f141e}
+.star-card .star-num{font-size:28px;font-weight:850}
+.star-card .star-name{font-size:15px;font-weight:700;margin-top:2px}
+.star-card .star-meta{font-size:12px;color:var(--muted);margin-top:4px}
+.star-card .star-desc{font-size:13px;line-height:1.65;color:#d4dbea;margin-top:10px}
+.compare-row{display:grid;grid-template-columns:110px 1fr 1fr;gap:10px;padding:11px 0;border-bottom:1px solid var(--line);font-size:13px;line-height:1.6}
+.compare-row:last-child{border-bottom:0}
+.compare-row .label{font-weight:700}
+.compare-row .plus{color:#bcebd4}
+.compare-row .minus{color:#ffc2cc}
+.plain-summary{border:1px solid rgba(122,162,255,.22);background:rgba(122,162,255,.055);border-radius:14px;padding:14px 15px;line-height:1.7;font-size:14px}
+.plain-summary b{color:#fff}
+.number-grid-wrap{max-width:560px;margin:14px auto 0}
+.number-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
+.number-cell{min-height:112px;border:1px solid var(--line);border-radius:15px;background:#0f141e;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:10px}
+.number-cell.active{box-shadow:inset 0 0 0 1px rgba(122,162,255,.5);background:rgba(122,162,255,.07)}
+.number-cell .num{font-size:30px;font-weight:850;line-height:1}
+.number-cell .times{margin-top:7px;font-size:13px;color:#d8deea}
+.number-cell .marks{margin-top:6px;min-height:18px;color:var(--accent);letter-spacing:3px;font-weight:800}
+.number-meaning{font-size:12px;color:var(--muted);margin-top:5px}
+.jg-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.jg-stat{padding:13px;border:1px solid var(--line);border-radius:13px;background:#0f141e}
+.jg-stat .k{font-size:12px;color:var(--muted)}
+.jg-stat b{display:block;font-size:18px;margin-top:5px}
+.line-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.line-item{padding:12px;border:1px solid var(--line);border-radius:12px;background:#0f141e}
+.line-item.full{border-color:rgba(94,211,154,.32)}
+.line-item.partial{border-color:rgba(255,199,102,.30)}
+.line-item.off{opacity:.68}
+.line-item .line-code{font-weight:800;font-size:15px}
+.line-item .line-desc{font-size:12px;line-height:1.55;margin-top:7px;color:#d5dcea}
+.trait-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.trait-box{border:1px solid var(--line);border-radius:13px;padding:13px;background:#0f141e}
+.trait-box h4{margin:0 0 8px;font-size:14px}
+.trait-box p{margin:0;color:#d4dbea;font-size:13px;line-height:1.65}
+.cycle-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:9px}
+.cycle-card{border:1px solid var(--line);border-radius:13px;background:#0f141e;padding:12px}
+.cycle-card.active{box-shadow:inset 0 0 0 1px rgba(122,162,255,.5)}
+.cycle-card .num{font-size:24px;font-weight:850}
+.cycle-card .label{font-size:12px;color:var(--muted);margin-top:3px}
+.cycle-card .desc{font-size:12px;line-height:1.55;margin-top:7px}
+.compat-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}
+.compat-kpi{padding:12px;border:1px solid var(--line);border-radius:12px;background:#0f141e}
+.compat-kpi b{display:block;font-size:20px;margin-top:3px}
+.compat-kpi span{font-size:12px;color:var(--muted)}
+.improve-box{margin-top:12px;border:1px solid rgba(101,212,232,.28);background:rgba(101,212,232,.055);border-radius:14px;padding:13px 14px}
+.improve-box h4{margin:0 0 9px;font-size:14px;color:#d8f7fb}
+.improve-list{display:grid;gap:7px}
+.improve-item{font-size:13px;line-height:1.65;padding:9px 10px;border-radius:10px;background:rgba(255,255,255,.025)}
+.improve-item b{color:#fff}
+.improve-inline{display:block;margin-top:6px;color:#cfe9ee;font-size:12px;line-height:1.55}
+.cycle-card .improve{margin-top:7px;padding-top:7px;border-top:1px dashed rgba(101,212,232,.22);color:#cfe9ee;font-size:11.5px;line-height:1.5}
+.muted{color:var(--muted)}
+.nowrap{white-space:nowrap}
+@media(max-width:1050px){.jg-summary,.compat-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
+.app{grid-template-columns:1fr}
+.sidebar{position:static;height:auto;border-right:0;border-bottom:1px solid var(--line)}
+.nav{flex-direction:row;overflow:auto}
+.nav button{white-space:nowrap}
+.sidebar-foot{display:none}
+.main{padding:20px}
+.g2,.daily-main{grid-template-columns:1fr}
+.form{grid-template-columns:repeat(2,minmax(0,1fr))}
+.branch-grid{grid-template-columns:repeat(2,1fr)}
+.legend{grid-template-columns:repeat(2,1fr)}
+.star-grid,.finance-kpis{grid-template-columns:repeat(2,1fr)}
+.dual{grid-template-columns:1fr}}
+@media(max-width:600px){.jg-summary,.compat-kpis,.trait-grid,.line-grid{grid-template-columns:1fr}
+.topbar{flex-direction:column}
+.form{grid-template-columns:1fr}
+.span2{grid-column:span 1}
+.branch-grid{grid-template-columns:repeat(2,1fr)}
+.main{padding:16px}
+.card{padding:14px}
+.legend,.star-grid,.finance-kpis{grid-template-columns:1fr}
+.compare-row{grid-template-columns:1fr}
+.compare-row .label{margin-bottom:-4px}}
+@media print{.sidebar,.actions,.input-card{display:none!important}
+.app{display:block}
+.main{max-width:none;padding:0}
+.section{display:block!important;page-break-after:always}
+.card{box-shadow:none;background:white;color:#111;border-color:#ddd}
+.sub,.mini,.muted{color:#555}
+.tbl th{color:#333;background:#eee}
+.tbl td,.tbl th{border-color:#ddd}}
+.sidebar,.main,.card,.grid,.daily-main,.field,.signal-box{min-width:0}
+.actions-wrap{max-width:100%;display:grid;gap:var(--space)}
+.save-status{font-size:12px;color:var(--muted);line-height:1.5;max-width:420px}
+.save-status.error,.form-error{color:var(--bad)}
+.form-error{font-size:13px;line-height:1.5;margin:12px 0}
+.form-error:empty{display:none}
+.btn-primary{background:var(--accent);color:var(--bg);border-color:var(--accent);font-weight:600}
+button:disabled{opacity:.45;cursor:not-allowed}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+input[aria-invalid="true"]{border-color:var(--bad)}
+input,select{color-scheme:dark}
+.year-fields{display:flex;gap:var(--space);max-width:100%}
+.year-fields .field{flex:1}
+@media(max-width:600px){.actions{gap:var(--space)}
+.btn{min-height:44px}
+.year-fields{width:100%}}
+@media print{html,body{background:#fff;color:#111}
+.actions-wrap,.form-error{display:none!important}
+.topbar p,.rel-desc,.branch-card .lbl,.branch-card .animal,.legend-item p,.field label{color:#444}
+.branch-card,.rel-item,.legend-item,.daybox,.notice,.tag,input,select{background:#fff;color:#111;border-color:#bbb}
+.tag.good,.tag.bad,.tag.info{color:#111;border-color:#888}
+.matrix th,.matrix td{background:#fff;color:#111;border-color:#bbb}
+.table-wrap{overflow:visible}
+.tbl,.matrix{min-width:0}
+.tbl td,.tbl th{overflow-wrap:anywhere}
+.daily-main,.g2{display:block}
+.card{margin-bottom:12px}
+.section:last-child{page-break-after:auto}}
+.fly-heading{display:flex;justify-content:space-between;align-items:start;gap:16px}
+.fly-heading .field{max-width:140px}
+.fly-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:18px}
+.fly-cell{border:1px solid var(--line);border-radius:14px;background:var(--panel2);color:var(--text);padding:16px 8px;min-width:0;text-align:left}
+.fly-cell[aria-pressed="true"]{border-color:var(--accent);background:rgba(122,162,255,.12)}
+.fly-cell strong{display:block;font-size:26px;margin:7px 0}
+.fly-cell small{display:block;color:var(--muted)}
+a{color:var(--accent)}
+.sidebar{overflow-y:auto}
+.sidebar-foot{position:static;margin-top:24px}
+.app{grid-template-columns:230px minmax(0,1fr)}
+@media(max-width:1050px){.app{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:600px){.fly-heading{flex-wrap:wrap}
+.fly-cell small{font-size:12px}
+.star-card,.number-cell{overflow-wrap:anywhere}}
+@media print{.fly-cell,.signal,.signal-box,.finance-kpi,.star-card,.jg-stat,.trait-box,.line-item,.cycle-card,.number-cell,.plain-summary,.improve-box{background:white;color:#111;border-color:#aaa}
+.plain-summary b,.improve-item b,.star-card .star-desc,.trait-box p,.line-desc{color:#111}
+.tbl,.matrix{min-width:0!important}}
+.birthday-layout{display:grid;grid-template-columns:minmax(280px,.85fr) minmax(0,1.15fr);gap:24px;align-items:start;margin-top:18px}
+.birthday-layout>div{min-width:0}
+.birthday-layout .number-grid-wrap{max-width:none;margin:0}
+.birthday-insights{align-items:start}
+.birthday-insights .dual,.birthday-insights .trait-grid{grid-template-columns:1fr}
+.birthday-insights .jg-summary{grid-template-columns:repeat(2,minmax(0,1fr))}
+.birthday-insights .jg-stat:first-child{grid-column:1/-1}
+@media(max-width:1100px){.birthday-layout{grid-template-columns:minmax(0,1fr)}
+.birthday-layout .number-grid-wrap{max-width:460px;margin:0 auto}}
+@media print{.birthday-layout{display:block}}
+.birthday-layout{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;align-items:stretch}
+.birthday-layout .number-grid-wrap{height:100%;display:flex;flex-direction:column}
+.birthday-layout .number-grid{flex:1;grid-auto-rows:1fr;gap:12px}
+.birthday-layout .number-cell{min-height:112px;border-radius:13px;padding:14px}
+.birthday-layout #numberLines{height:100%;grid-template-rows:repeat(4,minmax(0,1fr));gap:12px}
+.birthday-layout .line-item{border-radius:13px;padding:14px;display:flex;flex-direction:column;justify-content:center}
+.birthday-layout .line-item.off{opacity:1}
+.birthday-layout .line-code{font-size:15px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.birthday-layout .line-desc{font-size:13px;line-height:1.65;margin-top:10px}
+.birthday-insights{align-items:stretch;gap:16px}
+.birthday-insights>.card{display:grid;grid-template-rows:subgrid;grid-row:span 5;row-gap:14px}
+.birthday-insights>.card>h3{margin:0}
+.birthday-insights #numberPersonality,.birthday-insights .trait-grid,.birthday-insights .dual{display:contents}
+.birthday-insights .jg-summary{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;align-content:start}
+.birthday-insights .trait-box,.birthday-insights .signal-box,.birthday-insights .plain-summary,.birthday-insights .improve-box{margin:0!important;padding:14px;border-radius:13px}
+.birthday-insights .trait-box h4,.birthday-insights .signal-box h4,.birthday-insights .improve-box h4{font-size:14px;margin:0 0 10px}
+.birthday-insights .trait-box p,.birthday-insights .signal,.birthday-insights .improve-item{font-size:13px;line-height:1.65}
+@media(max-width:1100px){.birthday-layout{grid-template-columns:minmax(0,1fr)}
+.birthday-layout .number-grid-wrap{max-width:none}
+.birthday-layout #numberLines{height:auto;grid-template-rows:none;grid-auto-rows:1fr}}
+@media(max-width:1050px){.birthday-insights>.card{display:flex;flex-direction:column;gap:14px;grid-row:auto}}
+@media(max-width:600px){.birthday-layout .number-cell{padding:10px}
+.birthday-layout #numberLines{grid-template-columns:minmax(0,1fr)}}
+@media print{.birthday-layout{display:block}
+.birthday-insights>.card{display:block}}
+.birthday-layout>div{display:grid;min-height:0}
+.birthday-layout #birthdayNumberGrid{display:flex;flex-direction:column}
+.birthday-layout .number-grid-wrap{flex:1;height:auto}
+.birthday-layout #numberLines{height:auto}
+.birthday-layout .line-item{padding:12px}
+.birthday-layout .line-desc{margin-top:7px}
+.birthday-layout .number-grid{min-height:0}
+@media(max-width:1100px){.birthday-layout>div{display:block}
+.birthday-layout #birthdayNumberGrid{display:block}}
+:root{--bg:#090e18;--panel:#111b2b;--panel2:#182437;--line:#29384b;--text:#f4f7fc;--muted:#a8b7c9;--accent:#90b6ff;--radius:16px;--shadow:0 8px 28px rgba(0,0,0,.12)}
+html{scroll-behavior:smooth}
+body{background:radial-gradient(900px 500px at 60% -5%,rgba(61,99,167,.13),transparent 65%),var(--bg);line-height:1.55}
+.app{grid-template-columns:236px minmax(0,1fr)}
+.sidebar{background:#0d1523;border-right:1px solid #233146;padding:25px 14px;display:flex;flex-direction:column;gap:12px;z-index:5}
+.brand{padding:5px 9px 23px;border-bottom:1px solid var(--line)}
+.logo{width:43px;height:43px;flex:none;border-radius:13px;background:linear-gradient(145deg,#4778bc,#7764bb);box-shadow:none}
+.brand h1{font-size:15px;letter-spacing:.03em}
+.brand small{font-size:11px}
+.nav-caption{font-size:10px;letter-spacing:.16em;color:#788ba4;padding:3px 14px 0;font-weight:700}
+.nav{gap:3px}
+.nav button{min-height:43px;width:100%;font-size:13px;font-weight:500;padding:11px 13px;border-radius:10px;transition:background .16s,color .16s}
+.nav button.active{background:#223450;color:#e8f1ff;box-shadow:inset 3px 0 0 #8eb7ff}
+.nav button:hover{background:#1b2b41}
+.sidebar-foot{margin-top:auto;padding:15px 12px 0;border-top:1px solid var(--line);font-size:11px;line-height:1.7}
+.foot-dot{display:inline-block;height:7px;width:7px;border-radius:50%;background:#5ed39a;margin-right:4px}
+.foot-disclaimer{margin-top:8px;color:#8190a7}
+.main{max-width:1500px;padding:35px 38px 60px}
+.topbar{align-items:center;padding-bottom:24px;margin-bottom:24px;border-bottom:1px solid var(--line)}
+.topbar h2{font-size:clamp(22px,2.5vw,30px);letter-spacing:-.035em;font-weight:750;margin-bottom:6px}
+.topbar p{font-size:13px;line-height:1.55;max-width:600px}
+.actions-wrap{justify-items:end}
+.actions{justify-content:end}
+.btn{min-height:39px;font-size:12.5px;font-weight:600;white-space:nowrap;background:#17253a;border-color:#34455c;border-radius:9px;padding:9px 12px}
+.btn-primary{background:#90b6ff;color:#0a1628;border-color:#90b6ff}
+.btn-sm{min-height:32px;padding:5px 10px;font-size:12px}
+.save-status{text-align:right;font-size:11px;max-width:330px}
+.card{background:#111b2b;border:1px solid #28374b;border-radius:16px;box-shadow:none;padding:21px}
+.card h3{font-size:15px;font-weight:700;letter-spacing:.005em;margin:0 0 15px}
+.card-heading{display:flex;align-items:start;justify-content:space-between;gap:15px;margin-bottom:18px}
+.card-heading h3{margin:0 0 5px}
+.card-heading .sub{margin:0}
+.tiny-label{font-size:10px;white-space:nowrap;border:1px solid #304159;padding:5px 8px;border-radius:7px;color:#8ea6c3}
+.field label{font-size:12px;font-weight:600;color:#b7c8db}
+input,select{min-height:43px;border:1px solid #334359;background:#0c1524;border-radius:9px;padding:10px 12px;color-scheme:dark}
+input:hover,select:hover{border-color:#556c88}
+.branch-card,.rel-item,.star-card,.finance-kpi,.number-cell,.cycle-card,.daybox,.legend-item,.signal-box,.line-item,.jg-stat,.trait-box,.compat-kpi{background:#0d1726;border-color:#2c3b50;box-shadow:none}
+.branch-card .branch{font-weight:750;font-size:32px;color:#e4efff}
+.notice,.plain-summary,.improve-box{background:rgba(111,159,241,.055);border-color:#354966}
+.tbl th,.matrix th{background:#172337;color:#b6c9de}
+.tbl td{line-height:1.65}
+.table-wrap{border-color:#314059}
+.overview-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:16px}
+.overview-stat{min-height:102px;padding:16px 18px;background:#111d30;border:1px solid #304057;border-radius:14px;display:flex;flex-direction:column;justify-content:space-between}
+.overview-stat .label{color:#a9bbd0;font-size:11px;letter-spacing:.025em}
+.overview-stat strong{font-size:21px;line-height:1.2;letter-spacing:-.03em;font-weight:760}
+.overview-stat .meta{color:#92a9c3;font-size:11px}
+.overview-stat.featured{border-color:#4b6796;background:linear-gradient(135deg,#192d4c,#152338)}
+.section>.card,.section>.grid,.section>.daily-main,.section>.dual{margin-bottom:14px}
+.section>.card:last-child{margin-bottom:0}
+.fly-cell{cursor:pointer;transition:transform .15s,background .15s,border .15s}
+.fly-cell:hover{border-color:#799dd1;transform:translateY(-1px)}
+.tag{font-weight:500}
+@media(max-width:1200px){.main{padding:28px 24px 55px}
+.overview-stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+.topbar{align-items:flex-start}
+.actions-wrap{max-width:330px}}
+@media(max-width:1050px){.app{grid-template-columns:minmax(0,1fr)}
+.sidebar{position:sticky;top:0;height:auto;padding:11px 18px 9px;gap:6px;overflow:visible;border-right:0;border-bottom:1px solid var(--line);background:rgba(13,21,35,.97)}
+.brand{padding:0 4px 7px;border-bottom:0}
+.brand .logo{width:32px;height:32px;border-radius:9px}
+.brand h1{font-size:13px}
+.brand small{display:none}
+.nav-caption,.sidebar-foot{display:none}
+.nav{flex-direction:row;overflow-x:auto;scrollbar-width:thin;padding-bottom:3px}
+.nav button{width:auto;flex:none;min-height:36px;padding:8px 12px;font-size:12px}
+.nav button.active{box-shadow:inset 0 -2px 0 var(--accent)}
+.main{padding:25px 20px}
+.topbar{flex-direction:column;align-items:stretch}
+.actions-wrap{max-width:none;justify-items:start}
+.actions{justify-content:start}
+.save-status{text-align:left;max-width:none}
+.g2,.daily-main{grid-template-columns:1fr}}
+@media(max-width:600px){.main{padding:19px 13px 35px}
+.sidebar{padding:8px 12px 6px}
+.topbar{margin-bottom:16px;padding-bottom:16px}
+.topbar h2{font-size:23px}
+.actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));width:100%;gap:7px}
+.actions .btn{white-space:normal;min-height:42px;padding:8px 9px}
+.actions .btn-primary{grid-column:1/-1}
+.overview-stats{gap:8px}
+.overview-stat{padding:12px;min-height:90px}
+.overview-stat strong{font-size:18px}
+.overview-stat .meta{font-size:10px}
+.card{padding:15px}
+.card-heading{flex-wrap:wrap}
+.tiny-label{display:none}
+.form{grid-template-columns:1fr}
+.branch-grid{gap:8px}
+.branch-card{padding:12px 8px}
+.tbl{min-width:660px}
+.year-fields{gap:8px}
+.birthday-layout{grid-template-columns:minmax(0,1fr)}
+.fly-grid{gap:7px}
+.fly-cell{padding:12px 7px}
+.fly-cell strong{font-size:23px}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}
+*,*::before,*::after{transition:none!important;animation:none!important}}
+@media print{.overview-stats{grid-template-columns:repeat(4,1fr)}
+.overview-stat{background:#fff;color:#111;border-color:#ccc;min-height:auto}
+.overview-stat strong,.overview-stat .label,.overview-stat .meta{color:#111}
+.card{break-inside:avoid}
+.sidebar{display:none}
+.main{padding:0}
+.topbar{border:0}
+.topbar h2{color:#111}}
+.nav button{font-size:16px;font-weight:500;min-height:48px;line-height:1.5;letter-spacing:.025em;color:#c5d0df;gap:12px;padding:11px 12px;white-space:nowrap}
+.nav button.active{font-weight:600;color:#f4f8ff}
+.nav-icon{width:20px;height:20px;flex:0 0 20px;color:#9aadc6}
+.nav button.active .nav-icon{color:#a9c9ff}
+.brand h1{font-size:16px;font-weight:650;letter-spacing:0}
+.brand small{font-size:12px}
+.nav-caption{font-size:12px;letter-spacing:.08em;color:#a0afc3}
+.sidebar-foot{font-size:12px}
+@media(min-width:1051px){.app{grid-template-columns:250px minmax(0,1fr)}}
+@media(max-width:1050px){.nav button{font-size:14px;min-height:42px;padding:8px 12px;gap:8px}
+.nav-icon{width:17px;height:17px;flex-basis:17px}
+.brand h1{font-size:15px}}
+.annual-compact td{line-height:1.65}.annual-compact td:nth-child(5){min-width:190px}.annual-compact summary{cursor:pointer;color:var(--accent);white-space:nowrap}.birthday-insights>.card{display:flex;flex-direction:column;gap:14px;grid-row:auto}.birthday-insights #numberPersonality,.birthday-insights .trait-grid,.birthday-insights .dual{display:grid}.nav button{letter-spacing:0;font-size:15px;font-weight:500}.nav button.active{font-weight:650}.sidebar .brand h1{font-size:16px;letter-spacing:0}.sidebar .brand small{font-size:12px}.nav{gap:3px}.nav button{min-height:44px}.sidebar-foot{font-size:12px}.topbar p{font-size:13px;line-height:1.6}.card h3{font-size:17px}.sub{font-size:14px}.tbl td{font-size:14px}.tbl th{font-size:13px}.number-cell .marks{letter-spacing:1px}.birthday-layout{align-items:start}.birthday-layout .number-grid-wrap{height:auto}.birthday-layout #numberLines{height:auto;grid-template-rows:none}.line-item{min-height:90px}.card{box-shadow:none}.plain-summary{background:var(--panel2)}@media(max-width:600px){.nav button{font-size:14px;min-height:42px}.card h3{font-size:16px}}@media print{.annual-compact td:nth-child(5){min-width:0}}
+
+.advanced-settings{grid-column:1/-1}.advanced-settings>summary,.natal-detail>summary{cursor:pointer;font-weight:650}.advanced-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:10px}.natal-detail>summary{font-size:17px;margin-bottom:14px}.mobile-actions{display:none}.mobile-short{display:none}
+@media(max-width:600px){
+.main{padding:12px 12px 28px}.sidebar{padding:8px 12px 5px}.brand{padding:0 0 3px}.nav{gap:5px;scrollbar-width:none}.nav button{padding:8px 10px;min-height:40px}.nav-icon{display:none}.desktop-long{display:none}.mobile-short{display:inline}.nav button[data-sec="flying"]{order:7}.nav button[data-sec="matrix"]{order:8}.nav button[data-sec="guide"]{order:9}
+.main.home-mobile .topbar{display:none}#home.active{display:flex;flex-direction:column;gap:12px}#home>.input-card{order:0}#home>.natal-card{order:1;margin:0!important}#home>#overviewStats{order:2;margin:0}#home>.home-relations{order:3;margin:0!important;display:flex;flex-direction:column;gap:12px}.home-relations>.annual-card{order:0}.home-relations>.natal-detail{order:1}.natal-detail:not([open])>summary{margin:0}.mobile-actions{display:block;order:4}.mobile-actions .actions-wrap{width:100%}.mobile-actions .actions{grid-template-columns:repeat(3,minmax(0,1fr))}.mobile-actions .actions .btn-primary{grid-column:auto}.input-card .card-heading .sub,.input-card .form>.field>.mini{display:none}.input-card .card-heading{margin-bottom:10px}.input-card .form{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.input-card .span2{grid-column:span 1}.input-card input{min-width:0;padding:9px 7px;font-size:14px}.input-card .field label{white-space:nowrap;font-size:12px}.advanced-settings>summary{font-size:13px;color:var(--muted)}.advanced-grid{grid-template-columns:1fr}.input-card #autoStatus{margin-top:8px!important}.natal-card .branch-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}.natal-card .branch-card{padding:10px 3px;min-width:0}.natal-card .branch-card .branch{font-size:23px}.natal-card .branch-card .animal{font-size:12px}.overview-stat{min-height:84px}.card{padding:13px}
+}
+@media print{.mobile-actions{display:none!important}}
+
+#home.active{display:flex;flex-direction:column;gap:14px}#home>.input-card{order:0}#home>.holistic-card{order:1}#home>#overviewStats{order:2;margin:0}#home>.natal-card{order:3;margin:0!important}#home>.home-relations{order:4;margin:0!important}#home>.mobile-actions{order:5}.holistic-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:16px}.topic-card{padding:14px;border:1px solid var(--line);border-radius:12px;background:var(--panel2);min-width:0}.topic-card h4{margin:0 0 9px;font-size:16px}.topic-card p{font-size:14px;line-height:1.65;margin:8px 0}.topic-card details{margin-top:12px;border-top:1px solid var(--line);padding-top:10px}.topic-card summary{cursor:pointer;font-size:13px;color:var(--accent)}.topic-years{font-size:13px;line-height:1.6;margin-top:9px}.topic-years div+div{margin-top:7px}.topic-year-label{color:var(--muted)}.holistic-intro{line-height:1.75;font-size:15px}.holistic-intro p{margin:8px 0}.topic-note{font-size:12px;color:var(--muted);line-height:1.6}.topic-card .good-text{color:var(--good)}.topic-card .bad-text{color:var(--warn)}
+@media(max-width:600px){.holistic-grid{grid-template-columns:1fr;gap:8px}.topic-card{padding:12px}.holistic-intro{font-size:14px}.topic-card h4{font-size:16px}.holistic-card{padding:13px}.topic-card p{font-size:14px}}
+@media print{.topic-card{background:white;color:#111;break-inside:avoid}.topic-card .good-text,.topic-card .bad-text{color:#111}}
+.plain-year{padding:9px 0;border-bottom:1px solid var(--line);line-height:1.65}.plain-year:last-child{border-bottom:0}.plain-year>b{display:block;margin-bottom:3px}.plain-current{border-top:1px solid var(--line);padding-top:10px;margin-top:10px}.plain-current p{margin:5px 0}.topic-years .plain-year{overflow-wrap:anywhere}
+
+@media(max-width:600px){.star-card{padding:12px}.star-card .star-name{font-size:18px}.star-card .star-desc{margin-top:6px}.birthday-layout .number-cell{min-height:88px;padding:8px 4px}.number-cell .num{font-size:25px}.number-cell .times,.number-cell .marks,.number-meaning{margin-top:3px}.number-meaning{font-size:11px}.birthday-layout .number-grid{gap:7px}}
+.mode-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}.mode-head h3{margin:0}.mode-head label{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted)}.mode-head select{width:auto;max-width:100%}
+/* Shared period layout and dedicated paper report */
+#pdfReport,.period-cards{display:none}.period-card{border:1px solid var(--line);border-radius:12px;padding:14px;background:var(--panel2);margin:0 0 12px;min-width:0}.period-card header{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px}.period-card header b{font-size:17px;white-space:nowrap}.period-card header span{white-space:nowrap;color:var(--muted)}.period-topic{display:grid;grid-template-columns:5.5em minmax(0,1fr);gap:10px;border-top:1px solid var(--line);padding:10px 0;line-height:1.6}.period-topic p,.read-list p{margin:0 0 5px}.period-topic p:last-child{margin-bottom:0}.read-list article{padding:10px 0;border-bottom:1px solid var(--line);line-height:1.7}.read-list article:last-child{border-bottom:0}.read-list article b{display:block;margin-bottom:5px}.tag{white-space:nowrap;display:inline-block}.matrix th:first-child{position:sticky;left:0;z-index:2}.matrix thead th{position:sticky;top:0;z-index:3}.matrix thead th:first-child{z-index:4}
+@media(max-width:760px){#annualTable>.table-wrap,#financeAnnual>.table-wrap,#monthlyTable>.table-wrap,#hourTable>.table-wrap{display:none!important}.period-cards{display:block}.period-card{padding:12px}.period-topic{grid-template-columns:4.5em minmax(0,1fr);font-size:14px}.birthday-insights>.card{display:block!important}.birthday-insights .read-list{display:block}.period-card header b{font-size:16px}}
+@page{size:A4;margin:16mm 15mm 18mm}
+@media print{html,body{background:white!important;color:#172334!important;font-size:11pt}.app{display:none!important}#pdfReport{display:block!important;font-family:system-ui,'Noto Sans CJK TC',sans-serif;line-height:1.55;color:#172334}.report-head{border-bottom:2px solid #315675;padding-bottom:12px;margin-bottom:18px}.report-head h1{font-size:25pt;margin:4px 0}.report-head p{margin:3px 0;font-size:10pt}#pdfReport section{display:block!important;break-before:page;page-break-after:auto!important}#pdfReport section:first-of-type{break-before:auto}#pdfReport h2{font-size:17pt;color:#315675;border-bottom:1px solid #ccd6df;padding-bottom:6px;break-after:avoid}#pdfReport h3,#pdfReport h4{break-after:avoid}#pdfReport .period-card,#pdfReport .topic-card,#pdfReport .line-item,#pdfReport .read-list article{break-inside:avoid;page-break-inside:avoid;background:#fff!important;border:1px solid #d2dbe3;color:#172334!important;box-shadow:none;margin-bottom:8px;padding:10px}#pdfReport .period-topic{border-color:#d2dbe3}#pdfReport .period-card header span,#pdfReport .muted,#pdfReport .topic-note,#pdfReport .mini,#pdfReport .sub{color:#526273!important}#pdfReport .good-text{color:#176548!important}#pdfReport .bad-text{color:#9b422d!important}#pdfReport .number-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}#pdfReport .number-cell{min-height:65px;color:#172334!important;background:#fff!important;border:1px solid #ccd6df}#pdfReport .number-cell *{color:#172334!important}#pdfReport .holistic-intro,#pdfReport .plain-current,#pdfReport .signal,#pdfReport .improve-item{background:white!important;color:#172334!important}#pdfReport footer{margin-top:18px;color:#526273;font-size:9pt}#pdfReport .line-desc,#pdfReport .line-code{color:#172334!important}}
+</style>
+<style>.date-parts{display:grid;grid-template-columns:1.45fr 1fr 1fr;gap:6px;min-width:0}.date-parts select{min-width:0;width:100%;padding:9px 5px;font-size:15px;min-height:42px}.date-parts select[aria-invalid=true]{border-color:var(--bad)}@media(max-width:600px){.field.date-field{grid-column:1/-1!important}.date-parts select{font-size:16px}.date-parts{gap:8px}}</style></head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand"><div class="logo">合</div><div><h1>九宮・流年分析</h1><small>個人命理分析</small></div></div><div class="nav-caption">分析導覽</div>
+    <nav class="nav" id="nav">
+      <button class="active" data-sec="home"><svg class="nav-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>總覽</button>
+      <button data-sec="kyusei"><svg class="nav-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1 6.2-5.5-3-5.5 3 1-6.2L3 9.6l6.2-.9Z"/></svg><span class="desktop-long">個人九星・數字</span><span class="mobile-short">九宮</span></button>
+      <button data-sec="flying"><svg class="nav-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m15 9-2 6-4-4Z"/></svg><span class="desktop-long">年度飛星方位</span><span class="mobile-short">飛星</span></button>
+      <button data-sec="finance"><svg class="nav-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="15" rx="3"/><path d="M3 9h18m-5 5h2"/></svg>財運</button>
+      <button data-sec="annual"><svg class="nav-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4m10-4v4M3 10h18"/></svg>流年</button>
+      <button data-sec="monthly"><svg class="nav-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4m10-4v4M3 10h18M7 14h3m4 0h3m-10 4h3"/></svg>流月</button>
+      <button data-sec="daily"><svg class="nav-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span class="desktop-long">流日・流時</span><span class="mobile-short">流日</span></button>
+      <button data-sec="matrix"><svg class="nav-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18m6-18v18M3 9h18M3 15h18"/></svg><span class="desktop-long">合沖矩陣</span><span class="mobile-short">合沖</span></button>
+      <button data-sec="guide"><svg class="nav-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v6m0-10v1"/></svg><span class="desktop-long">關係說明</span><span class="mobile-short">說明</span></button>
+    </nav>
+    <div class="sidebar-foot"><span class="foot-dot"></span> 單機使用 · 個人資料不會上傳<div class="foot-disclaimer">傳統民俗解讀，不能用於健康、投資或重大人生決策。</div></div>
+  </aside>
+  <main class="main">
+    <header class="topbar"><div><h2 id="pageTitle">個人總覽</h2><p id="pageSub">修改資料即更新分析；保留設定請按「儲存到此瀏覽器」。</p></div><div class="actions-wrap"><div class="actions"><button class="btn btn-primary" id="saveBtn">儲存到此瀏覽器</button><button class="btn" id="copyBtn">複製個人與今年摘要</button><button class="btn" id="printBtn" onclick="exportReport()">儲存 PDF</button></div><div id="saveStatus" class="save-status" role="status">資料只存於此瀏覽器，不會跨裝置同步。修改後請按儲存。</div></div></header><div id="formError" class="form-error" role="alert"></div>
+
+    <section id="home" class="section active">
+      
+
+      <div class="card input-card">
+        <div class="card-heading"><div><h3>基本資料</h3><div class="sub">更新出生資料後，所有分析會同步重新計算。</div></div></div>
+        <div class="form">
+          <div class="field span2"><label for="birthDate">出生日期</label><input id="birthDate" type="date" min="1900-01-01" max="2100-12-31" value="1980-01-01"></div>
+          <div class="field"><label for="birthTime">出生時間（選填）</label><input id="birthTime" type="time"><div class="mini">不知道就留空</div></div>
+          <details class="advanced-settings" open><summary>進階設定</summary><div class="advanced-grid"><div class="field"><label for="tz">時區</label><select id="tz"></select></div>
+          <div class="field"><label for="dayBoundary">子時換日規則</label><select id="dayBoundary"><option value="midnight">00:00 換日</option><option value="zi">23:00 子初換日</option></select><div class="mini">23 點出生時適用</div></div></div></details>
+        </div>
+        <div id="autoStatus" class="auto-status" role="status" style="margin-top:12px">已自動更新</div>
+      </div>
+
+      
+<div class="card holistic-card"><h3>整體命理分析</h3><div id="holisticSummary" aria-live="polite"></div><div id="holisticTopics" class="holistic-grid"></div></div>
+<div id="overviewStats" class="overview-stats" aria-live="polite"></div>
+<div class="card natal-card" style="margin-top:14px"><h3>出生四柱</h3><div id="natalBranches" class="branch-grid"></div><div id="natalNote" class="sub" style="margin-top:12px"></div></div>
+
+      <div class="grid g2 home-relations" style="margin-top:14px">
+        <details class="card natal-detail" open><summary>命盤內部關係</summary><div id="natalRelations"></div></details>
+        <div class="card annual-card"><h3>當年度關係</h3><div id="currentAnnual"></div></div>
+      </div>
+      <div class="mobile-actions"></div>
+    </section>
+
+    <section id="kyusei" class="section">
+      <div class="card">
+        <h3>個人九星氣學</h3>
+        
+        <div id="kyuseiCards" class="star-grid"></div>
+        
+      </div>
+
+      <div class="card birthday-combined" style="margin-top:14px">
+        <div class="mode-head"><h3>生日九宮</h3></div><div id="digitSources" class="sub"></div>
+        
+        <div class="birthday-layout">
+          <div><div id="birthdayNumberGrid"></div></div>
+          <div><div id="numberLines" class="line-grid"></div></div>
+        </div>
+      </div>
+      <div class="grid g2 birthday-insights" style="margin-top:14px">
+        <div class="card"><h3>你的性格・強項・弱點</h3><div id="numberPersonality"></div><div id="numberPersonalityImprove" class="improve-box"></div></div>
+        <div class="card">
+          <h3>九宮財運・好壞對照</h3>
+          <div id="numberFinanceSummary" class="plain-summary"></div>
+          <div class="dual" style="margin-top:12px"><div class="signal-box goodbox"><h4>比較有利</h4><div id="numberFinanceGood" class="signal-list"></div></div><div class="signal-box badbox"><h4>比較容易出問題</h4><div id="numberFinanceRisk" class="signal-list"></div></div></div><div id="numberFinanceImprove" class="improve-box"></div>
+        </div>
+      </div>
+
+
+
+      <div class="card" style="margin-top:14px">
+        <h3>雙人合適／容易碰撞</h3>
+        <div class="sub" style="margin-bottom:12px">輸入對方生日，看看彼此的相處方式。</div>
+        <div class="form"><div class="field span2"><label for="compatDate">第二人生日</label><input id="compatDate" type="date" min="1900-01-01" max="2100-12-31"></div></div>
+        <div id="numberCompat" style="margin-top:14px"></div>
+      </div>
+      <div class="card" style="margin-top:14px"><h3>九星財務對照</h3><div id="kyuseiCompare"></div><div id="kyuseiImprove" class="improve-box"></div></div>
+    </section>
+
+    <section id="flying" class="section">
+ <div class="card"><div class="fly-heading"><div><h3>年度飛星九宮</h3><div class="sub">上南、下北、左東、右西；立春換年。</div></div><div class="field"><label for="flyingYear">查看年度</label><input id="flyingYear" type="number" min="1900" max="2100" step="1" value="2026"></div></div>
+ <div id="flyingError" class="form-error" role="alert"></div><div id="flyingGrid" class="fly-grid"></div><div id="flyingDetail" class="plain-summary" aria-live="polite" style="margin-top:14px"></div>
+ <div class="notice" style="margin-top:14px">請對照房屋內的方位。這是年度盤，尚未結合住宅坐向。</div>
+ <p class="sub">參考：<a href="https://www.wanlibk.com/readers/preread/9789621476395.pdf" target="_blank" rel="noopener">2026 年九宮飛星出版資料</a></p></div>
+</section>
+<section id="finance" class="section">
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap"><div><h3 style="margin-bottom:5px">四柱財庫</h3></div><div id="financeMode"></div></div>
+        <div id="financeKpis" class="finance-kpis" style="margin-top:14px"></div>
+        <div id="financeModeNote" class="notice" style="margin-top:14px"></div><div id="financePlainSummary" class="plain-summary" style="margin-top:12px"></div>
+      </div>
+      <div class="dual" style="margin-top:14px">
+        <div class="signal-box goodbox"><h4>比較有利的地方</h4><div id="financeGood" class="signal-list"></div></div>
+        <div class="signal-box badbox"><h4>比較容易漏財／破財的地方</h4><div id="financeRisk" class="signal-list"></div></div>
+      </div>
+      <div id="financeImprove" class="improve-box" style="margin-top:14px"></div>
+      <details class="card" style="margin-top:14px"><summary>查看財庫明細</summary><div id="financeDetails" style="margin-top:14px"></div></details>
+      <div class="card" style="margin-top:14px"><h3>流年對財庫的作用</h3><div class="sub" style="margin-bottom:12px">年份範圍可在「流年」調整。</div><div id="financeAnnual"></div></div>
+    </section>
+
+    <section id="annual" class="section">
+      <div class="card"><div style="display:flex;justify-content:space-between;gap:12px;align-items:end;flex-wrap:wrap"><div><h3 style="margin-bottom:5px">流年</h3><div class="sub">依立春分年，逐年查看與本命地支的關係。</div></div><div class="year-fields"><div class="field"><label for="yearFrom">開始年</label><input id="yearFrom" type="number" value="2026" min="1900" max="2100"></div><div class="field"><label for="yearTo">結束年</label><input id="yearTo" type="number" value="2035" min="1900" max="2100"></div></div></div><p class="sub">年齡為該公曆年滿歲；地支流年以立春交接。以下為民俗主題訊號，不代表必然事件、實際交往或婚姻次數。</p><div id="annualTable" style="margin-top:14px"></div></div>
+    </section>
+
+    <section id="monthly" class="section">
+      <div class="card"><div style="display:flex;justify-content:space-between;gap:12px;align-items:end;flex-wrap:wrap"><div><h3 style="margin-bottom:5px">流月</h3><div class="sub">月份以節氣交接。</div></div><div class="field" style="min-width:180px"><label for="monthYear">選擇流年</label><select id="monthYear"></select></div></div><div id="monthlyTable" style="margin-top:14px"></div></div>
+    </section>
+
+    <section id="daily" class="section">
+      <div class="daily-main">
+        <div class="card"><div class="card-heading"><h3>流日</h3><button type="button" class="btn btn-sm" id="todayBtn">回到今天</button></div><div class="field"><label for="focusDate">選擇日期</label><input id="focusDate" type="date"></div><div id="focusDay" style="margin-top:14px"></div></div>
+        <div class="card"><h3>十二流時</h3><div id="hourTable"></div></div>
+      </div>
+      <div class="card" style="margin-top:14px"><h3>所選日期前後各 7 天（含當日共 15 天）</h3><div id="dayStrip" class="daystrip"></div></div>
+    </section>
+
+    <section id="matrix" class="section">
+      <div class="card"><h3>十二地支合沖矩陣</h3><div id="relationMatrix" class="table-wrap"></div></div>
+    </section>
+
+    <section id="guide" class="section">
+      <div class="card"><h3>關係簡易說明</h3><div id="guideGrid" class="legend"></div></div>
+      <div class="card" style="margin-top:14px"><h3>怎麼看</h3><div class="notice">綠色表示連結，紅色表示牽動；兩者都不能單獨判定吉凶。</div></div>
+    </section>
+  </main>
+</div>
+<script>
+'use strict';
+const STEMS=['甲','乙','丙','丁','戊','己','庚','辛','壬','癸'];
+const STEM_ELEM=['木','木','火','火','土','土','金','金','水','水'];
+
+const HIDDEN={子:['癸'],丑:['己','癸','辛'],寅:['甲','丙','戊'],卯:['乙'],辰:['戊','乙','癸'],巳:['丙','戊','庚'],午:['丁','己'],未:['己','丁','乙'],申:['庚','壬','戊'],酉:['辛'],戌:['戊','辛','丁'],亥:['壬','甲']};
+const BRANCHES=['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
+const ANIMALS=['鼠','牛','虎','兔','龍','蛇','馬','羊','猴','雞','狗','豬'];
+const PARTS=['年支','月支','日支','時支'];
+const PILLAR_NAMES=['年柱','月柱','日柱','時柱'];
+const STAR_NAMES={1:'一白水星',2:'二黑土星',3:'三碧木星',4:'四綠木星',5:'五黃土星',6:'六白金星',7:'七赤金星',8:'八白土星',9:'九紫火星'};
+const STAR_ELEM={1:'水',2:'土',3:'木',4:'木',5:'土',6:'金',7:'金',8:'土',9:'火'};
+const STAR_PLAIN={
+1:'你比較會先觀察再出手，遇到變化時通常能轉彎，但有時會想太久。',
+2:'你偏向一步一步累積，比較重視安全感與穩定，不喜歡一下子冒太大的風險。',
+3:'你動作快、敢開始，新機會一出現就容易想試，但要防止太急。',
+4:'你很吃人脈、合作與資訊流，很多機會是從人和交流中來。',
+5:'你做事喜歡抓住主導權，也容易把資源集中在少數重點上。',
+6:'你重規則、效率與掌控，做財務決策時比較喜歡有制度、有原則。',
+7:'你對交易、價格、人脈與機會很敏感，錢的進出通常比較活。',
+8:'你重累積與基礎，會想把錢變成看得見、留得住的東西。',
+9:'你判斷快、對熱門趨勢很敏感，常能很早注意到大家開始關心的東西。'
+};
+const STAR_FINANCE={
+1:{good:'你對資金流動和時機感比較敏感，遇到環境變化時通常比較會調整。',risk:'容易想很多、方向分散，錢可能放著沒有效率，或一直等不到真正出手點。'},
+2:{good:'你比較願意慢慢存、慢慢累積，適合把錢分批留下來。',risk:'太保守時可能讓錢一直停著，也可能因為替別人承擔而增加支出。'},
+3:{good:'你敢找新收入、新機會，行動速度是你的優勢。',risk:'最大的問題是太快：太快買、太快加碼、太快換方向，都容易讓錢流出去。'},
+4:{good:'合作、人脈、客戶、資訊交換比較容易幫你帶來機會。',risk:'朋友、人情、合夥、借貸要講清楚，不然錢容易卡在人際關係裡。'},
+5:{good:'你有把資源集中起來做大事的傾向，適合有明確目標的資金配置。',risk:'最怕一次壓太大或把錢集中在單一地方，判斷錯時損失也會一起放大。'},
+6:{good:'你比較適合用制度管錢，例如固定比例、固定停損、固定儲蓄。',risk:'太相信自己的規則或判斷時，可能忽略市場已經改變。'},
+7:{good:'你對交易、談判、人脈和價格變化很敏感，找到賺錢機會的速度通常不慢。',risk:'錢也容易花得快，看到新機會就想換；享受、人情與衝動支出要特別留意。'},
+8:{good:'你比較能接受慢慢累積，也容易重視房產、設備、長期資產這種看得見的東西。',risk:'錢如果都鎖在不容易變現的地方，臨時需要現金時會比較卡。'},
+9:{good:'你對熱門題材、趨勢、消息的反應很快，容易提早注意到機會。',risk:'越熱門越要小心，因為你也比較容易在情緒最熱、價格最高的時候增加投入。'}
+};
+const STAR_IMPROVE={
+1:'設定決策期限與最低行動門檻，避免一直觀察卻沒有真正開始。',
+2:'保留一部分成長型選項，不要因求穩而把所有資金都放在低彈性位置。',
+3:'新機會先小額測試，再依結果增加投入；把「快」改成「先小後大」。',
+4:'合作、借貸、人情支出一律先把金額、期限與責任寫清楚。',
+5:'任何單一目標都設資金上限，避免資源過度集中。',
+6:'固定規則之外加一個「環境已改變嗎？」檢查點，避免僵化執行。',
+7:'把享受支出和投資資金分帳；看到新機會先確認是否只是想換標的。',
+8:'保留緊急預備金與可變現資產，避免資產很多但臨時沒有現金。',
+9:'熱門題材設定冷靜期與部位上限，越熱門越不要臨時加大投入。'
+};
+const REL_IMPROVE={
+'六合':'把合作條件說清楚並留下彈性，善用連結但不要把「合」當成一定有利。',
+'三合':'適合整合資源與找同方向的人，但仍要確認實際成本與責任。',
+'沖':'先保留緩衝資金與備案；重大調整分批進行，避免一次全改。',
+'刑':'把問題拆小、建立檢查點，減少同一件事反覆卡住。',
+'害':'重要事項多一次確認，尤其是承諾、金額與時間，避免誤解累積。',
+'破':'預先準備替代方案，不把所有安排綁在單一路徑上。',
+'自刑':'放慢決策速度，先寫下原因與退出條件，避免自己反覆推翻自己。'
+};
+const PALACE_BY_STAR={1:'坎宮',2:'坤宮',3:'震宮',4:'巽宮',5:'中宮',6:'乾宮',7:'兌宮',8:'艮宮',9:'離宮'};
+const PALACE_FINANCE={坎宮:{good:'你比較會留意現金流和轉彎空間，遇到變化時有彈性。',risk:'錢的進出容易比較活，手上最好一直留一筆能隨時用的現金。'},坤宮:{good:'你適合慢慢累積、穩穩守住，靠時間把資產做大。',risk:'太替別人想、太保守，可能讓自己的資金效率變低。'},震宮:{good:'你敢開始、敢找新收入，碰到機會通常不會拖太久。',risk:'最怕急著進場、急著加碼，很多破財都可能來自「太快」。'},巽宮:{good:'人脈、合作、客戶與資訊交換容易替你帶來財路。',risk:'合夥、借貸、人情錢一定要先講規則。'},中宮:{good:'你會想把資源集中管理，適合抓住少數真正重要的目標。',risk:'如果判斷錯，風險也容易一起集中。'},乾宮:{good:'你適合靠規則、管理和紀律把錢守住。',risk:'太有自信或不願改策略時，容易錯過環境已經變了的訊號。'},兌宮:{good:'你對交易、談判和現金流機會比較敏感。',risk:'享受、消費、聚會、人情與短期誘惑是比較容易漏財的地方。'},艮宮:{good:'你重視累積與資產基礎，守成能力通常不差。',risk:'錢放得太死、太難變現時，臨時要用會比較不方便。'},離宮:{good:'你對趨勢、曝光、熱門資訊反應快，容易早一步看到題材。',risk:'越熱越容易衝動，投資時要防止情緒把部位放大。'}};
+const KEISHA_MATRIX=[[0,4,3,2,1,9,8,7,6],[6,0,4,3,2,1,9,8,7],[7,6,0,4,3,2,1,9,8],[8,7,6,0,4,3,2,1,9],[9,8,7,6,0,4,3,2,1],[1,9,8,7,6,0,4,3,2],[2,1,9,8,7,6,0,4,3],[3,2,1,9,8,7,6,0,4],[4,3,2,1,9,8,7,6,0]];
+const sTermInfo=[0,21208,42467,63836,85337,107014,128867,150921,173149,195551,218072,240693,263343,285989,308563,331033,353350,375494,397447,419210,440795,462224,483532,504758];
+const sTermNames=['小寒','大寒','立春','雨水','驚蟄','春分','清明','穀雨','立夏','小滿','芒種','夏至','小暑','大暑','立秋','處暑','白露','秋分','寒露','霜降','立冬','小雪','大雪','冬至'];
+const jieIdx=[0,2,4,6,8,10,12,14,16,18,20,22];
+const jieBranch={0:1,2:2,4:3,6:4,8:5,10:6,12:7,14:8,16:9,18:10,20:11,22:0};
+const REL_DESC={
+  '六合':'彼此有連結、協調或相互吸引的傾向。',
+  '三合':'兩支同屬一組三合；目前未判定三字齊全或成局。',
+  '沖':'兩股力量方向相對，常代表變動、拉扯或需要調整。',
+  '刑':'容易出現摩擦、壓力或反覆卡住的感受。',
+  '害':'表面未必直接衝突，但可能有暗中牽制或磨合。',
+  '破':'結構容易鬆動、改變，適合留意原有安排是否被打破。',
+  '自刑':'同一地支重複作用，常被解讀為內在反覆或自我牽制。'
+};
+const sixHarmony=new Set(['子丑','寅亥','卯戌','辰酉','巳申','午未'].map(x=>[x[0],x[1]].sort().join('')));
+const clashes=new Set(['子午','丑未','寅申','卯酉','辰戌','巳亥'].map(x=>[x[0],x[1]].sort().join('')));
+const harms=new Set(['子未','丑午','寅巳','卯辰','申亥','酉戌'].map(x=>[x[0],x[1]].sort().join('')));
+const breaks=new Set(['子酉','丑辰','寅亥','卯午','巳申','未戌'].map(x=>[x[0],x[1]].sort().join('')));
+const punishPairs=new Set(['子卯','寅巳','寅申','巳申','丑未','丑戌','未戌'].map(x=>[x[0],x[1]].sort().join('')));
+const selfPunish=new Set(['辰','午','酉','亥']);
+const tripleHarmony=[['申','子','辰'],['亥','卯','未'],['寅','午','戌'],['巳','酉','丑']];
+const state={natal:null,selectedAnnual:new Date().getFullYear()};
+function localToday(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}
+function mod(n,m){return ((n%m)+m)%m}
+function pairKey(a,b){return [a,b].sort().join('')}
+function relations(a,b){const r=[],k=pairKey(a,b);if(a===b&&selfPunish.has(a))r.push('自刑');if(sixHarmony.has(k))r.push('六合');if(clashes.has(k))r.push('沖');if(harms.has(k))r.push('害');if(breaks.has(k))r.push('破');if(punishPairs.has(k))r.push('刑');for(const g of tripleHarmony){if(a!==b&&g.includes(a)&&g.includes(b)){r.push('三合');break}}return [...new Set(r)]}
+function relClass(x){return ['六合','三合'].includes(x)?'good':['沖','刑','害','破','自刑'].includes(x)?'bad':'info'}
+function tag(x){return `<span class="tag ${relClass(x)}">${x==='三合'?'同屬三合組':x}</span>`}
+function sTermUtc(year,n){return new Date(31556925974.7*(year-1900)+sTermInfo[n]*60000+Date.UTC(1900,0,6,2,5))}
+function toLocalParts(utcDate,tz){const d=new Date(utcDate.getTime()+tz*3600000);return {y:d.getUTCFullYear(),m:d.getUTCMonth()+1,d:d.getUTCDate(),hh:d.getUTCHours(),mm:d.getUTCMinutes()}}
+function civilToUtc(dateStr,timeStr,tz){const [y,m,d]=dateStr.split('-').map(Number),[hh,mm]=(timeStr||'12:00').split(':').map(Number);return new Date(Date.UTC(y,m-1,d,hh||0,mm||0,0)-tz*3600000)}
+function fmtDate(utcDate,tz){const p=toLocalParts(utcDate,tz);return `${p.y}-${String(p.m).padStart(2,'0')}-${String(p.d).padStart(2,'0')}`}
+function latestJie(utc){const y=utc.getUTCFullYear(),arr=[];for(let yr=y-1;yr<=y+1;yr++)for(const n of jieIdx)arr.push({yr,n,date:sTermUtc(yr,n),name:sTermNames[n],branchIndex:jieBranch[n]});arr.sort((a,b)=>a.date-b.date);let prev=arr[0],next=arr[arr.length-1];for(let i=0;i<arr.length;i++){if(arr[i].date<=utc)prev=arr[i];if(arr[i].date>utc){next=arr[i];break}}return {prev,next,all:arr}}
+function yearBranchFor(utc,tz){const y=toLocalParts(utc,tz).y,lc=sTermUtc(y,2),sy=utc>=lc?y:y-1,idx=mod(sy-1984,60);return {solarYear:sy,index:idx,stemIndex:idx%10,stem:STEMS[idx%10],branchIndex:idx%12,branch:BRANCHES[idx%12],text:STEMS[idx%10]+BRANCHES[idx%12]}}
+function monthBranchFor(utc,tz){const p=latestJie(utc).prev,yp=yearBranchFor(utc,tz),startStem=mod((yp.stemIndex%5)*2+2,10),off=mod(p.branchIndex-2,12),si=mod(startStem+off,10);return {stemIndex:si,stem:STEMS[si],branchIndex:p.branchIndex,branch:BRANCHES[p.branchIndex],text:STEMS[si]+BRANCHES[p.branchIndex],term:p.name,termDate:p.date}}
+function dayPillarFor(dateStr,timeStr='',boundary='midnight'){let [y,m,d]=dateStr.split('-').map(Number),cur=Date.UTC(y,m-1,d);if(timeStr&&boundary==='zi'&&Number(timeStr.split(':')[0])>=23)cur+=86400000;const base=Date.UTC(1900,0,1),days=Math.floor((cur-base)/86400000),idx=mod(10+days,60);return {index:idx,stemIndex:idx%10,stem:STEMS[idx%10],branchIndex:idx%12,branch:BRANCHES[idx%12],text:STEMS[idx%10]+BRANCHES[idx%12]}}
+function dayBranchFor(dateStr){const p=dayPillarFor(dateStr);return {branchIndex:p.branchIndex,branch:p.branch}}
+function hourBranchFor(timeStr,dayStemIndex){if(!timeStr)return null;const h=Number(timeStr.split(':')[0]),bi=Math.floor((h+1)/2)%12,si=mod(dayStemIndex*2+bi,10);return {stemIndex:si,stem:STEMS[si],branchIndex:bi,branch:BRANCHES[bi],text:STEMS[si]+BRANCHES[bi]}}
+function buildNatal(dateStr,timeStr,tz,boundary='midnight'){const utc=civilToUtc(dateStr,timeStr,tz),y=yearBranchFor(utc,tz),m=monthBranchFor(utc,tz),d=dayPillarFor(dateStr,timeStr,boundary),h=hourBranchFor(timeStr,d.stemIndex);return {dateStr,timeStr,tz,boundary,hasTime:!!timeStr,branches:[y,m,d].concat(h?[h]:[]),pillars:[y,m,d].concat(h?[h]:[]),year:y,month:m,day:d,hour:h}}
+function compareBranch(target,natal){const out=[];natal.branches.forEach((b,i)=>{relations(target,b.branch).forEach(rel=>out.push({part:PARTS[i],natal:b.branch,target,rel}))});return out}
+function renderRelationList(rels,targetLabel,targetBranch){if(!rels.length)return `<div class="muted">${targetLabel}${targetBranch} 與你的出生地支沒有主要合沖刑害破。</div>`;return `<div class="relation-list">${rels.map(r=>`<div class="rel-item"><div class="rel-head"><b>${r.part}${r.natal} × ${targetLabel}${targetBranch}</b><div class="tags">${tag(r.rel)}</div></div><div class="rel-desc"><b>${r.rel}</b>：${relationContext(r)}</div></div>`).join('')}</div>`}
+function branchCards(n){const arr=[n.year,n.month,n.day,n.hour];return arr.map((b,i)=>b?`<div class="branch-card"><div class="lbl">${PILLAR_NAMES[i]}</div><div class="branch">${b.text}</div><div class="animal">${ANIMALS[b.branchIndex]}</div></div>`:`<div class="branch-card unknown"><div class="lbl">時柱</div><div class="branch">—</div><div class="animal">未知</div></div>`).join('')}
+function internalRelations(n){const pairs=[];for(let i=0;i<n.branches.length;i++)for(let j=i+1;j<n.branches.length;j++){const rs=relations(n.branches[i].branch,n.branches[j].branch);rs.forEach(rel=>pairs.push({i,j,rel}))}if(!pairs.length)return '<span class="muted">目前出生地支之間沒有主要兩兩關係。</span>';return `<div class="relation-list">${pairs.map(x=>`<div class="rel-item"><div class="rel-head"><b>${PARTS[x.i]}${n.branches[x.i].branch} × ${PARTS[x.j]}${n.branches[x.j].branch}</b>${tag(x.rel)}</div><div class="rel-desc"><b>${x.rel}</b>：${REL_DESC[x.rel]}</div></div>`).join('')}</div>`}
+function annualBranch(year){const idx=mod(year-1984,60);return {year,index:idx,stemIndex:idx%10,stem:STEMS[idx%10],branchIndex:idx%12,branch:BRANCHES[idx%12],text:STEMS[idx%10]+BRANCHES[idx%12]}}
+function wrapStar(n){return mod(n-1,9)+1}
+function nineStarData(n){const honmei=wrapStar(7-(n.year.solarYear-1984)),mb=n.month.branchIndex,off=mod(mb-2,12),start=[1,4,7].includes(honmei)?8:[2,5,8].includes(honmei)?2:5,month=wrapStar(start-off),k=KEISHA_MATRIX[honmei-1][month-1],palace=k===0?'中宮':PALACE_BY_STAR[k];return {honmei,month,palace,keishaStar:k||null}}
+function wealthElement(dayElem){return {木:'土',火:'金',土:'水',金:'木',水:'火'}[dayElem]}
+function strictVaultFor(dayElem){return {木:'辰',火:'丑',土:'辰',金:'未',水:'戌'}[dayElem]}
+function financeData(n){const de=STEM_ELEM[n.day.stemIndex],we=wealthElement(de),vault=strictVaultFor(de),pillars=n.pillars,vaultPos=[],wealthExposed=[],hiddenWealth=[];pillars.forEach((p,i)=>{if(p.branch===vault)vaultPos.push(PILLAR_NAMES[i]);if(STEM_ELEM[p.stemIndex]===we)wealthExposed.push(`${PILLAR_NAMES[i]}${p.stem}`);const hs=HIDDEN[p.branch]||[],hits=hs.filter(st=>STEM_ELEM[STEMS.indexOf(st)]===we);if(hits.length)hiddenWealth.push(`${PILLAR_NAMES[i]}${p.branch}藏${hits.join('、')}`)});const interactions=[];vaultPos.length&&pillars.forEach((p,i)=>{if(p.branch!==vault||PILLAR_NAMES[i]!==vaultPos[0]){const rs=relations(vault,p.branch);rs.forEach(rel=>interactions.push(`${PILLAR_NAMES[i]}${p.branch}・${rel}`))}});return {dayElem:de,wealthElem:we,vault,vaultPos,vaultCount:vaultPos.length,selfSeated:n.day.branch===vault,doubleVault:vaultPos.length>=2,wealthExposed,hiddenWealth,interactions,woodAmbiguous:de==='木'}}
+
+function birthdayDigitCounts(dateStr){const counts=Array(10).fill(0);for(const digit of dateStr.replace(/\D/g,'')){const n=Number(digit);if(n)counts[n]++;}return counts;}
+function renderBirthdayNumberGrid(){digitSources.textContent=state.natal.dateStr.replaceAll("-","/")+" · 僅計出生年月日數字（不含0）；"+nineEngine().label;const c=birthdayDigitCounts(state.natal?.dateStr||birthDate.value),order=[1,2,3,4,5,6,7,8,9];const marks=n=>c[n]?('●'.repeat(Math.min(c[n],6))+(c[n]>6?'＋':'')):'—';birthdayNumberGrid.innerHTML=`<div class="number-grid-wrap"><div class="number-grid">${order.map(n=>`<div class="number-cell ${c[n]?'active':''}"><div class="num">${n}</div><div class="times">出現 <b>${c[n]}</b> 次</div><div class="marks">${marks(n)}</div><div class="number-meaning">${nineEngine().meaning(n)}</div></div>`).join('')}</div></div>`}
+
+function uniqueTips(arr){return [...new Set(arr.filter(Boolean))]}
+function relationImproveText(rels){if(!rels||!rels.length)return '沒有明顯合沖訊號時，以原本計畫為主，不必因命理結果刻意改變。';return uniqueTips(rels.map(r=>REL_IMPROVE[r.rel])).join('；')}
+function renderNumberPersonality(){
+ const c=birthdayDigitCounts(state.natal.dateStr),p=LoshuNine.numberProfile(c);
+ const weak={1:'遇到陌生問題時，可留意是否掌握足夠資訊。',2:'合作時，可留意是否理解他人的需要。',3:'有想法時，可留意是否遲遲未開始行動。',4:'遇到意見不同或環境變化時，可留意溝通是否清楚。',5:'生活忙碌時，可留意工作、家庭與休息是否失衡。',6:'遇到重大決定時，可留意責任分配與決策是否明確。',7:'相處時，可留意是否充分表達自己的感受。',8:'長期計畫中，可留意是否有持續累積的習慣。',9:'面對新資訊時，可留意觀察與表達是否充分。'};
+ numberPersonality.innerHTML=`<h4>個人強項</h4><div class="read-list">${p.entries.filter(x=>x.c).map(x=>`<article><b>${LoshuNine.meaning(x.n)}</b><p>${LoshuNine.trait(x.n).good}</p>${x.c>1?`<p class="muted">留意：${LoshuNine.trait(x.n).risk.split('；')[0]}。${LoshuNine.improve(x.n).strong}</p>`:''}</article>`).join('')}</div><h4>可以補強的地方</h4><div class="read-list">${p.missing.map(x=>`<article><b>${LoshuNine.meaning(x.n)}</b><p>${weak[x.n]}</p><p class="muted">改善：${LoshuNine.improve(x.n).missing}</p></article>`).join('')||'沒有缺數，維持均衡的生活習慣即可。'}</div>`;
+ numberPersonalityImprove.innerHTML='';numberPersonalityImprove.hidden=true;
+}
+function renderNumberLines(){
+ const c=birthdayDigitCounts(state.natal.dateStr),lines=nineEngine().numberLineData(c);
+ numberLines.innerHTML=lines.map(l=>{const text=nineEngine().lineText(l.code);return `<div class="line-item ${l.status}"><div class="line-code">${l.name}（${l.code}） ${l.status==='full'?'<span class="tag good">完整連線</span>':l.status==='empty'?'<span class="tag info">全缺線</span>':l.status==='partial'?'<span class="tag warn">半連線</span>':'<span class="tag">未成線</span>'}</div><div class="line-desc">${(text[l.status]||text.off)}</div></div>`}).join('');
+}
+function renderNumberFinance(){const c=birthdayDigitCounts(state.natal.dateStr),x=nineEngine().numberFinanceData(c),tips=nineEngine().numberFinanceImproveData(c);numberFinanceSummary.innerHTML=nineEngine().financeSummary(c);numberFinanceGood.innerHTML=x.good.map(t=>`<div class="signal">${t}</div>`).join('');numberFinanceRisk.innerHTML=x.risk.map(t=>`<div class="signal">${t}</div>`).join('');numberFinanceImprove.innerHTML=`<h4>改善方式</h4><div class="improve-list">${tips.map((t,i)=>`<div class="improve-item"><b>${i+1}.</b> ${t}</div>`).join('')}</div>`}
+function renderNumberCompat(){if(!compatDate.value){numberCompat.innerHTML='<div class="muted">請輸入對方生日。</div>';return}const x=nineEngine().compatAnalysis(state.natal.dateStr,compatDate.value),fmt=arr=>arr.length?arr.join('、'):'無';const sharedText=x.shared.length?x.shared.slice(0,5).map(n=>`${n}：${nineEngine().trait(n).good}`).join('<br>'):'共同數字不多，需要靠溝通建立共同節奏。';const compText=x.complement.length?x.complement.slice(0,5).map(n=>`${n}：一方較弱、另一方有，可形成互補，但也可能因做法不同而需要磨合。`).join('<br>'):'互補數字較少，兩人比較像靠相似特質互動。';const fricText=x.friction.length?x.friction.map(n=>`${n}：雙方都偏強，${nineEngine().trait(n).risk.split('；')[0]}。`).join('<br>'):'沒有明顯「雙方同一數字都很強」的碰撞點。';const tips=[];if(x.friction.length)tips.push(`雙方都強的 ${x.friction.join('、')}：發生爭執時先暫停「誰對誰錯」，改成各自說出一個需求與一個可接受方案。`);if(x.complement.length)tips.push('互補不等於一方永遠補另一方；把擅長的事情分工，但重要決定仍要兩人共同確認。');if(x.bothMissing.length)tips.push(`共同缺少 ${x.bothMissing.join('、')}：把相關事情制度化，例如固定溝通、共同預算或定期回顧，避免兩人都忽略。`);if(x.shared.length>=6)tips.push('同頻高時容易彼此放大優點，也可能一起犯同一種錯；重要決策刻意找第三種觀點。');if(!tips.length)tips.push('把「合不合」當成溝通提示，不當成關係判決；固定說清楚期待、金錢與責任界線最重要。');numberCompat.innerHTML=`<div class="plain-summary"><b>整體互動：${x.type}</b><br></div><div class="compat-kpis" style="margin-top:10px"><div class="compat-kpi"><span>共同數字</span><b>${x.shared.length}</b><div class="mini">${fmt(x.shared)}</div></div><div class="compat-kpi"><span>互補數字</span><b>${x.complement.length}</b><div class="mini">${fmt(x.complement)}</div></div><div class="compat-kpi"><span>共同缺數</span><b>${x.bothMissing.length}</b><div class="mini">${fmt(x.bothMissing)}</div></div><div class="compat-kpi"><span>強勢碰撞</span><b>${x.friction.length}</b><div class="mini">${fmt(x.friction)}</div></div></div><div class="trait-grid" style="margin-top:10px"><div class="trait-box"><h4>合適／同頻</h4><p>${sharedText}</p></div><div class="trait-box"><h4>互補</h4><p>${compText}</p></div><div class="trait-box"><h4>容易碰撞</h4><p>${fricText}</p></div><div class="trait-box"><h4>共同弱點</h4><p>${x.bothMissing.length?x.bothMissing.map(n=>`缺 ${n}：${nineEngine().trait(n).risk.split('；').pop()}`).join('<br>'):'沒有共同缺數。'}</p></div></div><div class="improve-box"><h4>相處改善方式</h4><div class="improve-list">${uniqueTips(tips).map(t=>`<div class="improve-item">${t}</div>`).join('')}</div></div>`}
+function renderFullNumberAnalysis(){renderNumberPersonality();renderNumberLines();renderNumberFinance();renderNumberCompat()}
+
+function financePlainText(n,f){if(f.doubleVault)return `你目前的盤裡，同一個財庫「${f.vault}」出現 ${f.vaultCount} 次，所以可以叫做「雙財庫」${f.vaultCount>2?'或多財庫':''}。但這不代表錢一定是別人的兩倍，而是「存錢、聚財、資金累積」這個主題比較明顯。接下來最重要的是看這個庫有沒有被沖、刑、害、破，以及財星有沒有直接露出來。`;if(f.vaultCount===1)return `你目前看得到一個財庫「${f.vault}」。意思不是保證有錢，而是命理上有一個「比較容易累積、收住資源」的位置。能不能真的留下錢，還要看它有沒有被沖動、牽制，以及你的財星是明著出現還是藏在裡面。`;return `目前已知的${n.hasTime?'四':'三'}柱裡，沒有看到嚴格財庫「${f.vault}」。這不等於沒財運，只代表「靠財庫來聚財」不是現在最明顯的訊號；更要看收入來源、藏財、透財和流年變化。${n.hasTime?'':'因為出生時間還沒填，時柱仍可能改變這個結果。'}`}
+function renderKyusei(){const n=state.natal,k=nineStarData(n),same=k.honmei===k.month,p=PALACE_FINANCE[k.palace];
+const card=(star,label)=>`<div class="star-card"><div class="star-meta">${label}</div><div class="star-name">${STAR_NAMES[star]}</div><div class="star-desc">${STAR_PLAIN[star]}</div></div>`;
+kyuseiCards.style.gridTemplateColumns=same?'repeat(auto-fit,minmax(min(100%,220px),1fr))':'';
+kyuseiCards.innerHTML=card(k.honmei,same?'本命星・月命星':'本命星')+(same?'':card(k.month,'月命星'))+`<div class="star-card"><div class="star-meta">行動特質</div><div class="star-name">${k.palace}傾斜</div><div class="star-desc">${k.keishaStar?STAR_PLAIN[k.keishaStar]:'在做決定時，可留意是否過度集中在自己的想法；保留聽取不同意見的空間。'}</div></div>`;
+renderBirthdayNumberGrid();renderFullNumberAnalysis();
+const rows=[[same?'本命星・月命星':'本命星',STAR_FINANCE[k.honmei]],...(!same?[['月命星',STAR_FINANCE[k.month]]]:[]),['傾斜宮',p]];
+kyuseiCompare.innerHTML=rows.map(([label,v])=>`<div class="compare-row"><div class="label">${label}</div><div class="plus">比較有利：${v.good}</div><div class="minus">比較要小心：${v.risk}</div></div>`).join('');
+const starTips=uniqueTips([STAR_IMPROVE[k.honmei],STAR_IMPROVE[k.month],k.keishaStar?STAR_IMPROVE[k.keishaStar]:null]);kyuseiImprove.innerHTML=`<h4>改善方式</h4><div class="improve-list">${starTips.map((t,i)=>`<div class="improve-item"><b>${i+1}.</b> ${t}</div>`).join('')}</div>`;}
+
+function annualVaultText(a,vault){const rs=relations(a.branch,vault),good=[],risk=[],improve=[];if(a.branch===vault){good.push('財庫重現，財務主題被放大');risk.push('庫氣加重也可能讓資金更集中或卡住');improve.push('把資金分成可動用與長期兩部分，避免全部鎖在同一處')}if(rs.includes('六合')||rs.includes('三合')){good.push('有資源連結、合作或整合的訊號');risk.push('「合」不等於現金一定增加，也可能形成牽制');improve.push('合作或整合前先確認成本、退出條件與責任')}if(rs.includes('沖')){good.push('容易出現資金重新配置與調整機會');risk.push('資金進出與波動可能放大；逢沖不等於自動開庫發財');improve.push('大額調整採分批進行，並預留緊急現金')}if(rs.some(x=>['刑','害','破','自刑'].includes(x))){good.push('可藉變動檢查原有財務結構');risk.push('牽制、損耗或原有安排被打亂的訊號增加');improve.push('降低不必要支出與集中風險，重要安排準備備案')}if(!good.length)good.push('沒有直接作用財庫，較偏平穩觀察');if(!risk.length)risk.push('仍需配合實際現金流與投資風險，不以命理單獨決策');if(!improve.length)improve.push('維持原有儲蓄與風險規則，不因沒有明顯訊號就額外加大部位');return {rs,good:good.join('；'),risk:risk.join('；'),improve:uniqueTips(improve).join('；')}}
+function renderFinance(){const n=state.natal,f=financeData(n),mode=n.hasTime?'四柱資料・含時柱':'基礎模式・沒有出生時間';financeMode.innerHTML=`<span class="mode-badge ${n.hasTime?'full':'base'}">${mode}</span>`;financeKpis.innerHTML=`<div class="finance-kpi"><div class="k">你的「財」是哪一種五行</div><b>${f.wealthElem}</b><div class="mini">${n.day.stem}${f.dayElem}日主，以${f.wealthElem}為財</div></div><div class="finance-kpi"><div class="k">你的財庫是哪個字</div><b>${f.vault}</b><div class="mini">目前在已知資料出現 ${f.vaultCount} 次</div></div><div class="finance-kpi"><div class="k">財庫有沒有直接坐在日柱</div><b>${f.selfSeated?'有':'沒有'}</b><div class="mini">${f.selfSeated?'自坐財庫':'非自坐財庫'}</div></div><div class="finance-kpi"><div class="k">有沒有兩個以上同一財庫</div><b>${f.doubleVault?'有，雙財庫':n.hasTime?'沒有':'還不能確定'}</b><div class="mini">${n.hasTime?'已經把時柱算進去':'補出生時間後會再重算'}</div></div>`;financeModeNote.innerHTML=n.hasTime?`已包含出生時間。${Number(n.timeStr.split(':')[0])===23?`換日時間：${n.boundary==='zi'?'23:00':'00:00'}。`:''}`:'尚缺出生時間，部分結果可能改變。' ;financePlainSummary.innerHTML=`${financePlainText(n,f)}`;const good=[],risk=[];if(f.vaultCount)good.push(`你目前看得到財庫「${f.vault}」${f.vaultCount>1?`，而且出現 ${f.vaultCount} 次`:''}，代表「把錢收住、累積資源」這個主題在命盤裡有位置。`);else risk.push(`目前已知資料裡沒有看到財庫「${f.vault}」。不是沒有財，而是「靠庫來聚財」這個訊號不明顯。`);if(f.selfSeated)good.push('財庫剛好就在你的日柱下面，俗稱「自坐財庫」；財庫和你自己的核心位置貼得很近。');if(f.doubleVault)good.push('同一個財庫重複兩次以上，所以「雙財庫」成立；但不是雙倍有錢，而是聚財／守財這個題目更值得看。');if(f.hiddenWealth.length)good.push(`有「藏財」：${f.hiddenWealth.join('；')}。錢的訊號藏在地支裡，不一定一開始就很明顯。`);else risk.push('目前已知地支裡沒有看到藏財，財的訊號比較不靠「藏在庫裡」這種方式呈現。');if(f.wealthExposed.length)good.push(`有「透財」：${f.wealthExposed.join('、')}。財星直接出現在天干，通常比較容易被看見或直接表現。`);else risk.push('財星沒有直接露在天干上，賺錢機會或財務成果可能要靠條件、時間或環境帶動，不一定一眼就看得出來。');const neg=f.interactions.filter(x=>/[沖刑害破自刑]/.test(x));if(neg.length)risk.push(`財庫有被拉扯：${neg.join('、')}。錢比較容易因變動、支出、調整或外在事情而流出去，不適合把「有財庫」直接當成一定守得住。`);const pos=f.interactions.filter(x=>/六合|三合/.test(x));if(pos.length)good.push(`財庫有「合」的關係：${pos.join('、')}。資源比較容易和其他事情連在一起，但不代表一定賺錢。`);if(!n.hasTime)risk.push('因為沒有出生時間，最容易被漏掉的是「時柱又多一個財庫」或「時柱剛好對財庫有作用」這兩種情況。');if(f.woodAmbiguous)risk.push('土財庫暫採辰；不同流派可能有不同結果。');const improve=[];if(!f.vaultCount)improve.push('不要等「財庫」帶財，改用固定儲蓄、現金流與長期累積建立自己的聚財機制。');if(f.doubleVault)improve.push('雙財庫更要注意流動性：至少保留一部分隨時可用的現金，不把資源全部鎖住。');if(!f.wealthExposed.length)improve.push('把重點放在穩定收入與可重複的賺錢方式，不必追求短期一次性的財運。');if(neg.length)improve.push('財庫有拉扯時，大額支出與投資採分批、設上限，並預先留一筆緊急預備金。');if(pos.length)improve.push('有合的結構可以利用合作與資源整合，但金額、責任與退出方式要先寫清楚。');if(!n.hasTime)improve.push('若能取得出生時間，補上後再看雙財庫與時柱作用；目前結果先當基礎版，不做過度推論。');if(!improve.length)improve.push('維持先存後花、分散與定期檢查三個基本規則，就能降低大部分財務波動。');financeGood.innerHTML=good.length?good.map(x=>`<div class="signal">${x}</div>`).join(''):'<div class="signal muted">目前沒有特別突出的聚財訊號。</div>';financeRisk.innerHTML=risk.length?risk.map(x=>`<div class="signal">${x}</div>`).join(''):'<div class="signal muted">目前沒有明顯的財庫牽制訊號。</div>';financeImprove.innerHTML=`<h4>改善方式</h4><div class="improve-list">${uniqueTips(improve).map((t,i)=>`<div class="improve-item"><b>${i+1}.</b> ${t}</div>`).join('')}</div>`;financeDetails.innerHTML=`<div class="table-wrap"><table class="tbl"><thead><tr><th>項目</th><th>你的結果</th><th>依據</th></tr></thead><tbody><tr><td>現在用了幾柱？</td><td><b>${n.hasTime?'四柱，含出生時間':'三柱，還沒有出生時間'}</b></td><td>${n.pillars.map(p=>p.text).join('・')}</td></tr><tr><td>什麼五行代表你的錢？</td><td><b>${f.wealthElem}</b></td><td>${n.day.stem}${f.dayElem}日主所剋的${f.wealthElem}，稱為財星。</td></tr><tr><td>你的財庫是哪個字？</td><td><b>${f.vault}</b></td><td>依「財星五行 → 墓庫」對照。${f.woodAmbiguous?'這裡有流派差異。':''}</td></tr><tr><td>財庫出現在哪裡？</td><td>${f.vaultPos.join('、')||'目前沒出現'}</td><td>${f.vaultCount>=2?'同一財庫出現兩次以上，所以可稱雙財庫。':f.vaultCount===1?'目前有一個財庫。':'已知柱裡沒有財庫。'}</td></tr><tr><td>錢有沒有藏在地支裡？</td><td>${f.hiddenWealth.join('、')||'目前沒看到'}</td><td>藏財。</td></tr><tr><td>財星有沒有直接露出來？</td><td>${f.wealthExposed.join('、')||'目前沒看到'}</td><td>財星透干。</td></tr><tr><td>財庫穩不穩？</td><td>${f.interactions.join('、')||'目前沒有主要合沖刑害破'}</td><td>有沖、刑、害、破時代表變動或牽制；有合則代表連結。都不能單獨等同「一定發財／一定破財」。</td></tr></tbody></table></div>`;const from=+yearFrom.value,to=+yearTo.value,rows=[];for(let y=Math.min(from,to);y<=Math.max(from,to);y++){const a=annualBranch(y),t=annualVaultText(a,f.vault);rows.push({a,t})}financeAnnual.innerHTML=`<div class="table-wrap"><table class="tbl"><thead><tr><th>年份</th><th>流年</th><th>有沒有碰到你的財庫 ${f.vault}</th><th>可能有利</th><th>比較要小心</th><th>改善方式</th></tr></thead><tbody>${rows.map(({a,t})=>`<tr><td><b>${a.year}</b></td><td><b>${a.text}</b></td><td>${a.branch===f.vault?'<span class="tag warn">財庫又出現</span> ':''}${t.rs.length?t.rs.map(tag).join(' '):'<span class="muted">沒有直接作用</span>'}</td><td>${t.good}</td><td>${t.risk}</td><td>${t.improve}</td></tr>`).join('')}</tbody></table></div>`}
+
+function renderOverviewStats(){
+ if(!state.natal){overviewStats.innerHTML='';return}
+ const n=state.natal,year=yearBranchFor(new Date(),n.tz).solarYear,a=annualBranch(year),k=nineStarData(n),f=financeData(n),rels=compareBranch(a.branch,n);
+ const specs=[
+  ['出生四柱',n.hasTime?'資料完整':'缺出生時間',n.hasTime?n.pillars.map(p=>p.text).join(' · '):'可補時柱以增加完整度'],
+  ['本命九星',STAR_NAMES[k.honmei],`月命 ${STAR_NAMES[k.month]}`],
+  [`${year} 流年`,a.text,`與本命有 ${rels.length} 項主要關係`],
+  ['四柱財庫',`${f.vault} · ${f.vaultCount} 處`,n.hasTime?'已包含時柱':'暫為三柱分析']
+ ];
+ overviewStats.innerHTML=specs.map((v,i)=>`<div class="overview-stat ${i===2?'featured':''}"><div class="label">${v[0]}</div><strong>${v[1]}</strong><div class="meta">${v[2]}</div></div>`).join('');
+}
+
+
+// 九宮先天主題與流年訊號分開判讀；不推算實際事件次數。
+function lifeTopics(n,year){
+ const a=annualBranch(year), r=compareBranch(a.branch,n), f=financeData(n), age=year-Number(n.dateStr.slice(0,4));
+ const pos=x=>['六合','三合'].includes(x.rel), neg=x=>!pos(x), group=parts=>r.filter(x=>parts.includes(x.part));
+ const fam=group(['年支','月支','時支']), love=group(['日支']), work=group(['月支']), wealth=STEM_ELEM[a.stemIndex]===f.wealthElem, hidden=(HIDDEN[a.branch]||[]).some(x=>STEM_ELEM[STEMS.indexOf(x)]===f.wealthElem), peer=STEM_ELEM[a.stemIndex]===f.dayElem, vault=f.vaultCount?relations(a.branch,f.vault):[];
+ const peach={申:'酉',子:'酉',辰:'酉',寅:'卯',午:'卯',戌:'卯',亥:'子',卯:'子',未:'子',巳:'午',酉:'午',丑:'午'}, noble={甲:'丑未',戊:'丑未',庚:'丑未',乙:'子申',己:'子申',丙:'亥酉',丁:'亥酉',辛:'寅午',壬:'卯巳',癸:'卯巳'};
+ const romance=[n.year.branch,n.day.branch].some(b=>peach[b]===a.branch), helper=noble[n.day.stem].includes(a.branch);
+ const explain=rs=>rs.map(x=>`${x.part}${x.natal}・${x.rel==='三合'?'同屬三合組':x.rel}`);
+ const make=(g,b)=>({good:uniqueTips(g),risk:uniqueTips(b)});
+ return {year,age,topics:{
+ 家庭:make([...explain(fam.filter(pos))],explain(fam.filter(neg))),
+ 感情:make([...(romance?['年支／日支桃花']:[]),...explain(love.filter(pos))],explain(love.filter(neg))),
+ 婚姻:make([...explain(love.filter(pos))],explain(love.filter(neg))),
+ 人際:make([...(helper?['日干天乙貴人']:[]),...explain(r.filter(pos))],explain(r.filter(neg))),
+ 工作:make([...explain(work.filter(pos))],[...explain(work.filter(neg))]),
+ 事業:make([...explain(group(['年支']).filter(pos)),...(wealth?['資源發展']:[])],[...explain(group(['年支']).filter(neg)),...(peer?['資源競爭']:[])]),
+ 財運:make([...(wealth?[a.stemIndex%2===n.day.stemIndex%2?'偏財':'正財']:[]),...(hidden?['流年地支藏財']:[]),...(a.branch===f.vault?['流年出現財庫']:[])],[...(peer?['流年天干與日主同五行，資源競爭提示']:[]),...vault.filter(x=>!['六合','三合'].includes(x)).map(x=>'本命財庫・'+x)])}};
+}
+function plainLife(name,items,risk=false){
+ const themes={家庭:['與家人增進交流、互相支持','家庭分工或生活安排需要協調'],感情:['增進感情、拉近彼此距離','感情溝通與相處方式需要調整'],婚姻:['適合討論長期承諾與共同生活','伴侶間的期待與責任需要重新協調'],人際:['拓展人脈、尋找互惠合作','留意人情壓力、承諾與合作摩擦'],工作:['改善工作合作與執行方式','工作安排或職務方向可能需要調整'],事業:['整合資源、推進發展計畫','檢視發展方向與執行阻礙'],財運:['整理收入與資產','留意資金變動與額外支出']};
+ return uniqueTips(items.map(t=>{if(t.includes('桃花'))return '可多留意認識新對象的機會';if(t.includes('天乙貴人'))return '可主動尋求他人協助與引薦';if(t==='正財')return '可留意固定收入與工作報酬';if(t==='偏財')return '可留意額外收入與商業機會';if(t.includes('天干見財星'))return '可留意收入或額外進財機會';if(t.includes('地支藏財'))return '可探索尚未明朗的收入來源';if(t.includes('出現財庫'))return '適合檢視儲蓄與資產累積';if(t.includes('資源競爭'))return '留意合夥、借貸與資源競爭';if(t.includes('本命財庫'))return '留意資金周轉及非預期支出';return themes[name][+risk]}));
+}
+function renderHolistic(){
+ const n=state.natal,c=birthdayDigitCounts(n.dateStr),p=nineEngine().numberProfile(c),k=nineStarData(n),f=financeData(n),now=yearBranchFor(new Date(),n.tz).solarYear,by=Number(n.dateStr.slice(0,4)),current=lifeTopics(n,now);
+ holisticSummary.innerHTML=`<div class="holistic-intro"><p>${p.entries.filter(v=>v.c).map(v=>nineEngine().trait(v.n).good).join(" ")}</p><p><b>${now} 年（當年滿 ${now-by} 歲）</b>：${uniqueTips(Object.entries(current.topics).flatMap(([name,t])=>plainLife(name,t.good))).slice(0,3).join("；")||"今年沒有特別突出的變化主題"}。</p></div><div class="topic-note">民俗趨勢解讀，非確定事件。${n.hasTime?'':'出生時間未填。'}</div>`;
+ const specs=nineEngine().homeTopics(c,p,f);
+ const history=[];for(let y=by;y<=Math.min(2100,Math.max(now+15,by+80));y++)history.push(lifeTopics(n,y));
+ const ageLabel=o=>`${o.age}歲 · ${o.year}年`;
+ const labels={家庭:['家庭交流','家庭磨合'],感情:['感情機會','感情變化'],婚姻:['婚緣與承諾','婚姻磨合'],人際:['貴人與益友','人際風險'],工作:['工作發展','工作變動'],事業:['事業成長','事業調整'],財運:['進財與聚財','漏財與破財風險']};
+ holisticTopics.innerHTML=specs.map(([name,plain,ad])=>{let timing='';if(name!=='個性'){const t=current.topics[name],rows=history.filter(o=>o.age>=(name==='家庭'?0:18)&&(o.topics[name].good.length||o.topics[name].risk.length)),render=(o)=>{const t=o.topics[name];return `<div class="plain-year"><b>${ageLabel(o)}</b>${t.good.length?`<div class="good-text">${plainLife(name,t.good).join('；')}。</div>`:''}${t.risk.length?`<div class="bad-text">${plainLife(name,t.risk,true).join('；')}。</div>`:''}</div>`},near=rows.filter(o=>o.year>now).slice(0,3);timing=`<div class="plain-current"><b>${now} 年</b>${t.good.length?`<p class="good-text">${labels[name][0]}：${plainLife(name,t.good).join('；')}。</p>`:''}${t.risk.length?`<p class="bad-text">${labels[name][1]}：${plainLife(name,t.risk,true).join('；')}。</p>`:''}${!t.good.length&&!t.risk.length?'<p>今年沒有特別突出的變化主題。</p>':''}</div>${near.length?`<div class="topic-years"><b>接下來值得留意的年份</b>${near.map(render).join('')}</div>`:''}<details><summary>查看完整年份分析</summary><div class="topic-years">${rows.length?rows.map(render).join(''):'沒有特別突出的年份。'}</div></details>`;}return `<article class="topic-card"><h4>${name}</h4><p>${plain}</p><p class="topic-note">${ad}</p>${timing}</article>`}).join('');
+}
+
+function renderHome(){const n=state.natal;document.querySelector('#natalBranches').innerHTML=branchCards(n);document.querySelector('#natalNote').innerHTML=`${n.hasTime?'':'未填出生時間，時柱暫缺。'}`;document.querySelector('#natalRelations').innerHTML=internalRelations(n);const y=yearBranchFor(new Date(),n.tz).solarYear,a=annualBranch(y),rels=compareBranch(a.branch,n);document.querySelector('#currentAnnual').innerHTML=`<div style="display:flex;gap:14px;align-items:center;margin-bottom:12px"><div class="branch-card" style="width:110px;padding:12px"><div class="lbl">${y}</div><div class="branch">${a.branch}</div><div class="animal">${ANIMALS[a.branchIndex]}</div></div><div><b>${y} 流年地支：${a.branch}</b><div class="sub" style="margin-top:5px">共出現 ${rels.length} 個主要關係</div></div></div>${renderRelationList(rels,'流年',a.branch)}`}
+function renderAnnual(){const n=state.natal,rows=[];for(let y=+yearFrom.value;y<=+yearTo.value;y++)rows.push({a:annualBranch(y),life:lifeTopics(n,y)});const names=['家庭','感情','婚姻','人際','工作','事業','財運'];annualTable.innerHTML=`<div class="table-wrap"><table class="tbl annual-compact"><thead><tr><th>年份 / 年齡</th>${names.map(x=>`<th>${x}</th>`).join('')}</tr></thead><tbody>${rows.map(({a,life})=>`<tr><td><b>${a.year} · ${a.text}</b><div class="mini">${life.age<0?'出生前':life.age+' 歲（當年滿）'}</div></td>${names.map(name=>{const t=life.topics[name];return `<td>${life.age<0||(life.age<18&&name!=='家庭')?'—':(plainLife(name,t.good).map(x=>`<div class="good-text">${x}</div>`).join('')+plainLife(name,t.risk,true).map(x=>`<div class="bad-text">${x}</div>`).join('')||'—')}</td>`}).join('')}</tr>`).join('')}</tbody></table></div>`;monthYear.innerHTML=rows.map(({a})=>`<option value="${a.year}">${a.year}・${a.text}</option>`).join('');if(!rows.some(x=>x.a.year===state.selectedAnnual))state.selectedAnnual=rows[0]?.a.year||new Date().getFullYear();monthYear.value=state.selectedAnnual}
+
+function monthPeriods(year){const arr=[];for(let n of [2,4,6,8,10,12,14,16,18,20,22])arr.push({year,n,date:sTermUtc(year,n),name:sTermNames[n],branchIndex:jieBranch[n]});arr.push({year:year+1,n:0,date:sTermUtc(year+1,0),name:'小寒',branchIndex:1});arr.push({year:year+1,n:2,date:sTermUtc(year+1,2),name:'立春',branchIndex:2});arr.sort((a,b)=>a.date-b.date);const start=arr.findIndex(x=>x.n===2&&x.year===year),out=[];for(let i=start;i<start+12;i++){const cur=arr[i],next=arr[i+1];out.push({branchIndex:cur.branchIndex,branch:BRANCHES[cur.branchIndex],start:cur.date,end:next.date,name:cur.name})}return out}
+function renderMonthly(){if(!state.natal)return;state.selectedAnnual=+monthYear.value||state.selectedAnnual;const tz=state.natal.tz,periods=monthPeriods(state.selectedAnnual);monthlyTable.innerHTML=`<div class="table-wrap"><table class="tbl"><thead><tr><th>流月</th><th>期間</th><th>主要關係</th><th>簡易說明</th><th>改善方式</th></tr></thead><tbody>${periods.map((m,i)=>{const rels=compareBranch(m.branch,state.natal);return `<tr><td><b style="font-size:18px">${m.branch}</b><div class="mini">${ANIMALS[m.branchIndex]}・${m.name}起</div></td><td>${fmtDate(m.start,tz)} ～ ${fmtDate(new Date(m.end.getTime()-1),tz)}</td><td>${rels.length?`<div class="tags">${rels.map(r=>`<span class="tag ${relClass(r.rel)}">${r.part}${r.natal}・${r.rel}</span>`).join('')}</div>`:'<span class="muted">無主要關係</span>'}</td><td>${rels.length?rels.map(r=>`${r.part}${r.natal} × 流月${m.branch}：<b>${r.rel}</b>－${relationContext(r)}`).join('<br>'):'—'}</td><td>${relationImproveText(rels)}</td></tr>`}).join('')}</tbody></table></div>`}
+function renderDaily(){if(!state.natal)return;const ds=focusDate.value||localToday(),d=dayBranchFor(ds),rels=compareBranch(d.branch,state.natal);focusDay.innerHTML=`<div class="branch-card" style="max-width:140px"><div class="lbl">${ds}</div><div class="branch">${d.branch}</div><div class="animal">${ANIMALS[d.branchIndex]}</div></div><div style="margin-top:12px">${renderRelationList(rels,'流日',d.branch)}</div><div class="improve-box"><h4>今天的改善方式</h4><div class="improve-item">${relationImproveText(rels)}</div></div>`;const rows=[];for(let bi=0;bi<12;bi++){const start=(bi*2+23)%24,end=(start+2)%24,b=BRANCHES[bi],r=compareBranch(b,state.natal);rows.push({start,end,b,bi,r})}hourTable.innerHTML=`<div class="table-wrap"><table class="tbl" style="min-width:760px"><thead><tr><th>時段</th><th>流時支</th><th>關係</th><th>簡易說明</th><th>改善方式</th></tr></thead><tbody>${rows.map(x=>`<tr><td class="nowrap">${String(x.start).padStart(2,'0')}:00–${String(x.end).padStart(2,'0')}:00</td><td><b style="font-size:18px">${x.b}</b><div class="mini">${ANIMALS[x.bi]}</div></td><td>${x.r.length?`<div class="tags">${x.r.map(r=>`<span class="tag ${relClass(r.rel)}">${r.part}${r.natal}・${r.rel}</span>`).join('')}</div>`:'<span class="muted">無主要關係</span>'}</td><td>${x.r.length?x.r.map(r=>`${r.rel}：${relationContext(r)}`).join('<br>'):'—'}</td><td>${relationImproveText(x.r)}</td></tr>`).join('')}</tbody></table></div>`;const base=new Date(ds+'T00:00:00Z'),boxes=[];for(let i=-7;i<=7;i++){const x=new Date(base.getTime()+i*86400000),xd=x.toISOString().slice(0,10),db=dayBranchFor(xd),rr=compareBranch(db.branch,state.natal);boxes.push(`<div class="daybox ${i===0?'today':''}"><b>${xd.slice(5)}</b><small>${db.branch}・${ANIMALS[db.branchIndex]}</small><div class="tags" style="margin-top:7px">${rr.length?rr.slice(0,3).map(r=>tag(r.rel)).join(''):'<span class="mini">無主要關係</span>'}</div><span class="improve-inline">${relationImproveText(rr)}</span></div>`)}dayStrip.innerHTML=boxes.join('')}
+// Readable period cards: the same annual model feeds screen and report.
+function periodCard(title,meta,body){return `<article class="period-card"><header><b>${title}</b><span>${meta||''}</span></header>${body||'<p class="muted">沒有特別突出的命理主題。</p>'}</article>`}
+function topicRows(life){return Object.entries(life.topics).filter(([name,t])=>life.age>=0&&(life.age>=18||name==='家庭')&&(t.good.length||t.risk.length)).map(([name,t])=>`<div class="period-topic"><b>${name}</b><div>${plainLife(name,t.good).map(x=>`<p>${x}。</p>`).join('')}${plainLife(name,t.risk,true).map(x=>`<p class="bad-text">留意：${x}。</p>`).join('')}</div></div>`).join('')}
+function annualCards(financeOnly=false){const n=state.natal;let out='';for(let y=+yearFrom.value;y<=+yearTo.value;y++){const a=annualBranch(y),life=lifeTopics(n,y);if(life.age<0)continue;const t=life.topics['財運'];let body=financeOnly?`<div class="period-topic"><b>收入與累積</b><div>${plainLife('財運',t.good).map(x=>`<p>${x}。</p>`).join('')||'沒有特別突出的收入或累積主題。'}</div></div><div class="period-topic"><b>支出與風險</b><div>${plainLife('財運',t.risk,true).map(x=>`<p>${x}。</p>`).join('')||'維持正常收支管理。'}</div></div>`:topicRows(life);out+=periodCard(`${y} 年 · ${life.age} 歲`,a.text,body)}return out||'<p>選擇的期間在出生之前。</p>'}
+function renderResponsive(){
+ for(const [id,html] of [['annualTable',annualCards()],['financeAnnual',annualCards(true)]]){const host=document.getElementById(id);host.querySelector('.period-cards')?.remove();host.insertAdjacentHTML('beforeend',`<div class="period-cards">${html}</div>`)}
+ for(const id of ['monthlyTable','hourTable']){const host=document.getElementById(id);host.querySelector('.period-cards')?.remove();const rows=[...host.querySelectorAll('tbody tr')];host.insertAdjacentHTML('beforeend',`<div class="period-cards">${rows.map(r=>{const cells=[...r.cells];return periodCard(cells[0].innerText.replace(/\n/g,' '),cells[1].innerText.replace(/\n/g,' '),`<p>${cells[4].innerText}</p>`)}).join('')}</div>`)}
+}
+function exportReport(){if(!state.natal||!validateInputs())return;const n=state.natal;const clone=id=>{const el=document.getElementById(id).cloneNode(true);el.querySelectorAll('details').forEach(d=>d.open=true);return el.innerHTML};const topics=[...holisticTopics.querySelectorAll('.topic-card')].map(el=>{const copy=el.cloneNode(true);copy.querySelectorAll('details,.topic-years').forEach(x=>x.remove());return copy.outerHTML}).join('');
+ const report=document.getElementById('pdfReport');report.innerHTML=`<header class="report-head"><div>個人命理報告</div><h1>九宮・流年分析</h1><p>出生日期 ${n.dateStr}　出生時間 ${n.timeStr||'未提供'}　UTC${n.tz>=0?'+':''}${n.tz}</p><p>洛書九宮 × 傳統干支｜${yearFrom.value}–${yearTo.value} 年（年齡為當年滿歲）</p></header><section><h2>01 整體分析</h2>${clone('holisticSummary')}${topics}</section><section><h2>02 洛書九宮</h2>${clone('birthdayNumberGrid')}${clone('numberPersonality')}${clone('numberLines')}</section><section><h2>03 財運分析</h2>${clone('financePlainSummary')}<h3>年度財運</h3>${annualCards(true)}</section><section><h2>04 流年分析</h2>${annualCards()}</section><section><h2>05 流月與流日・流時</h2><h3>${monthYear.value} 年流月</h3>${monthlyTable.querySelector('.period-cards')?.innerHTML||''}<h3>${focusDate.value} 流日與流時</h3>${clone('focusDay')}${hourTable.querySelector('.period-cards')?.innerHTML||''}</section><footer>本報告為傳統民俗解讀，不代表實際事件必然發生。</footer>`;window.print();}
+function renderMatrix(){let h='<table class="matrix"><thead><tr><th></th>'+BRANCHES.map((b,i)=>`<th><span class="head">${b}</span><br>${ANIMALS[i]}</th>`).join('')+'</tr></thead><tbody>';for(let i=0;i<12;i++){h+=`<tr><th><span class="head">${BRANCHES[i]}</span><br>${ANIMALS[i]}</th>`;for(let j=0;j<12;j++){const rs=relations(BRANCHES[i],BRANCHES[j]);h+=`<td class="${i===j?'self':''}">${rs.length?rs.map(tag).join(' '):'—'}</td>`}h+='</tr>'}h+='</tbody></table>';relationMatrix.innerHTML=h}
+function renderGuide(){guideGrid.innerHTML=Object.entries(REL_DESC).map(([k,v])=>`<div class="legend-item"><div>${tag(k)}</div><p>${v}</p></div>`).join('')}
+function fillTZ(){const opts=[];for(let x=-12;x<=14;x+=.5){const s=(x>=0?'+':'')+(Number.isInteger(x)?x:x.toFixed(1));opts.push(`<option value="${x}" ${x===8?'selected':''}>UTC${s}</option>`)}tz.innerHTML=opts.join('')}
+function collect(){return {birthDate:birthDate.value,birthTime:birthTime.value,tz:tz.value,dayBoundary:dayBoundary.value,yearFrom:yearFrom.value,yearTo:yearTo.value,compatDate:compatDate?.value||''}}
+function applySaved(o){if(!o)return;Object.entries(o).forEach(([k,v])=>{const el=document.getElementById(k);if(el)el.value=v})}
+let savedSnapshot=null;
+function saveMessage(text,error=false){saveStatus.textContent=text;saveStatus.className='save-status'+(error?' error':'')}
+function updateSaveStatus(){saveMessage(JSON.stringify(collect())===savedSnapshot?'已儲存到此瀏覽器，不會跨裝置同步。':'尚未儲存這次設定。分析會自動更新，保留設定請按儲存。')}
+function validateInputs(){
+ const fields=[birthDate,yearFrom,yearTo,compatDate];fields.forEach(el=>el.removeAttribute('aria-invalid'));
+ let error='',field=null;
+ if(!birthDate.value||!birthDate.validity.valid){error='請回總覽輸入有效的出生日期。';field=birthDate}
+ else if(!yearFrom.value||!yearTo.value||![+yearFrom.value,+yearTo.value].every(y=>Number.isInteger(y)&&y>=1900&&y<=2100)){error='請在流年頁輸入 1900–2100 之間的整數年份。';field=(!yearFrom.value||!yearFrom.validity.valid)?yearFrom:yearTo}
+ else if(+yearFrom.value>+yearTo.value){error='開始年不可晚於結束年，請在流年頁調整。';field=yearFrom}
+  else if(compatDate.value && !compatDate.validity.valid){error='請輸入有效的第二人生日。';field=compatDate}
+ if(field)field.setAttribute('aria-invalid','true');
+ formError.textContent=error;
+ [saveBtn,copyBtn,printBtn].forEach(el=>el.disabled=!!error);
+ return !error;
+}
+function recalc(){
+ if(!validateInputs()){
+ state.natal=null;
+ ['holisticSummary','holisticTopics','overviewStats','natalBranches','natalRelations','currentAnnual','annualTable','monthlyTable','focusDay','hourTable','dayStrip','kyuseiCards','birthdayNumberGrid','digitSources','numberPersonality','numberPersonalityImprove','numberLines','numberFinanceSummary','numberFinanceGood','numberFinanceRisk','numberFinanceImprove','numberCompat','kyuseiCompare','kyuseiImprove','financeMode','financeKpis','financeModeNote','financePlainSummary','financeGood','financeRisk','financeImprove','financeDetails','financeAnnual'].forEach(id=>document.getElementById(id).textContent='請先修正上方提示的資料，再查看分析。');
+ natalNote.textContent='';autoStatus.textContent='資料尚未完整，分析已暫停';autoStatus.className='auto-status error';return;
+ }
+ state.natal=buildNatal(birthDate.value,birthTime.value,+tz.value,dayBoundary.value);
+ renderHome();renderKyusei();renderFinance();renderAnnual();renderMonthly();renderDaily();renderMatrix();renderGuide();renderOverviewStats();renderHolistic();renderResponsive();
+ autoStatus.textContent=birthTime.value?'分析已更新・含時支':'分析已更新・未提供出生時間';autoStatus.className='auto-status';
+}
+function summaryText(){if(!state.natal)return '';const n=state.natal,a=annualBranch(yearBranchFor(new Date(),state.natal.tz).solarYear),rels=compareBranch(a.branch,n),f=financeData(n),k=nineStarData(n);return `出生地支：${n.branches.map((b,i)=>PARTS[i]+b.branch).join('｜')}${n.hasTime?'':'｜時支未知'}\n九星：${STAR_NAMES[k.honmei]}｜月命 ${STAR_NAMES[k.month]}｜${k.palace}傾斜\n財運模式：${n.hasTime?'四柱資料':'三柱基礎'}｜日主 ${n.day.stem}${f.dayElem}｜財庫 ${f.vault} × ${f.vaultCount}${f.selfSeated?'｜自坐財庫':''}${f.doubleVault?'｜雙財庫':''}\n${a.year}流年：${a.text}\n合沖關係：${rels.map(r=>`${r.part}${r.natal}-${r.rel}`).join('、')||'無主要關係'}`}
+const titles={flying:['年度飛星方位','依年份看空間方位；不使用生日，不等於個人吉凶。'],home:['個人總覽','修改資料即更新分析；保留設定請按「儲存到此瀏覽器」。'],kyusei:['九星・生日九宮','從出生資料查看九星、數字九宮與雙人互補。'],finance:['財運','查看財庫、藏財、透財與流年關係。'],annual:['流年','逐年查看流年地支與出生地支的關係。'],monthly:['流月','依節氣月份查看每月合沖關係。'],daily:['流日・流時','從某一天再細分到十二個時辰。'],matrix:['合沖矩陣','完整十二地支兩兩關係。'],guide:['關係說明','六合、三合、沖、刑、害、破、自刑的簡易解釋。']};
+nav.addEventListener('click',e=>{const b=e.target.closest('button[data-sec]');if(!b)return;document.querySelectorAll('.nav button').forEach(x=>x.classList.toggle('active',x===b));document.querySelectorAll('.section').forEach(x=>x.classList.toggle('active',x.id===b.dataset.sec));window.scrollTo(0,0);pageTitle.textContent=titles[b.dataset.sec][0];pageSub.textContent=titles[b.dataset.sec][1]});
+let timer=null;function schedule(){autoStatus.textContent='資料變更中…';autoStatus.className='auto-status wait';clearTimeout(timer);updateSaveStatus();[saveBtn,copyBtn,printBtn].forEach(el=>el.disabled=true);timer=setTimeout(recalc,180)}
+['birthDate','birthTime','tz','dayBoundary','yearFrom','yearTo'].forEach(id=>document.getElementById(id).addEventListener(id==='yearFrom'||id==='yearTo'?'input':'change',schedule));monthYear.onchange=()=>{state.selectedAnnual=+monthYear.value;renderMonthly();renderResponsive()};focusDate.onchange=()=>{renderDaily();renderResponsive()};document.addEventListener('change',e=>{if(!state.natal)return;if(e.target?.id==='compatDate'){renderNumberCompat();updateSaveStatus()}});
+saveBtn.onclick=()=>{
+ if(!validateInputs())return;
+ try{const snapshot=JSON.stringify(collect());localStorage.setItem('hechongState',snapshot);savedSnapshot=snapshot;updateSaveStatus()}
+ catch{saveMessage('儲存失敗：瀏覽器無法保存資料。請檢查網站儲存權限後重試。',true)}
+};
+copyBtn.onclick=async()=>{const t=summaryText();if(!t)return;try{await navigator.clipboard.writeText(t);copyBtn.textContent='已複製';setTimeout(()=>copyBtn.textContent='複製個人與今年摘要',1000)}catch{window.prompt('無法自動複製，請選取以下摘要並手動複製：',t)}};
+
+const BIRTH_AREAS={年支:'家族與早年背景',月支:'父母與成長環境',日支:'伴侶與親密相處',時支:'子女、晚輩與晚年'};
+function relationContext(r){return `你的${r.part}「${r.natal}」與「${r.target}」形成${r.rel==='三合'?'同屬三合組':r.rel}。${REL_DESC[r.rel]} 傳統宮位可對照${BIRTH_AREAS[r.part]}；不單憑此項判定事件。`}
+const FLY_ORDER=['中宮','西北','正西','東北','正南','正北','西南','正東','東南'];
+const FLY_DISPLAY=['東南','正南','西南','正東','中宮','正西','東北','正北','西北'];
+const FLY_TOPIC={1:'交流、人緣',2:'傳統稱病符',3:'口舌、溝通',4:'學習、文書',5:'傳統偏向守靜',6:'權責、助力',7:'耗損、保管',8:'資源、累積',9:'喜慶、人際'};
+const FLY_EXAMPLE={1:'若這裡是客廳，可對照家人交流、接待朋友的使用情境。',2:'若這裡是臥室，僅表示傳統年盤關注此區；不能據此判斷居住者會生病。',3:'若這裡是工作區，可對照協作時的分工與溝通，不代表必有爭吵。',4:'若書桌位於這一區，可對照讀書、寫作與準備考試的情境，不代表保證考好。',5:'若此區有裝修計畫，這是傳統會標示的位置；實際仍按工程安全條件安排。',6:'若這裡是辦公區，可對照工作分工與尋求協助，不代表必然升職。',7:'若這裡是出入口，可對照物品保管，不代表必然失竊。',8:'若這裡用來工作，可對照資源整理與累積，不是收入或投資預測。',9:'若這裡是聚會區，可對照慶祝與相處，不代表會結婚或添丁。'};
+let flyingDirection='東北';
+function flyingStarsFor(year){const center=wrapStar(7-(year-1984));return Object.fromEntries(FLY_ORDER.map((dir,i)=>[dir,wrapStar(center+i)]))}
+function renderFlying(){const year=Number(flyingYear.value);if(!flyingYear.value||!Number.isInteger(year)||year<1900||year>2100){flyingError.textContent='請輸入 1900–2100 的整數年度。';flyingGrid.innerHTML='';flyingDetail.textContent='';return}flyingError.textContent='';const chart=flyingStarsFor(year);flyingGrid.innerHTML=FLY_DISPLAY.map(dir=>`<button class="fly-cell" data-direction="${dir}" data-flying-star="${chart[dir]}" aria-pressed="${dir===flyingDirection}"><span>${dir}</span><strong>${chart[dir]}</strong><small>${STAR_NAMES[chart[dir]]}</small><small>${FLY_TOPIC[chart[dir]]}</small></button>`).join('');const star=chart[flyingDirection];flyingDetail.innerHTML=`<b>${year} 年・${flyingDirection}・${STAR_NAMES[star]}</b><br>傳統主題：${FLY_TOPIC[star]}<br>${FLY_EXAMPLE[star]}`}
+flyingYear.addEventListener('change',renderFlying);
+flyingGrid.addEventListener('click',e=>{const button=e.target.closest('[data-direction]');if(button){flyingDirection=button.dataset.direction;renderFlying()}});
+
+const LoshuNine=(()=>{
+const NUMBER_MEANING={"1": "智慧／應變", "2": "包容／合作", "3": "行動／開創", "4": "溝通／適應", "5": "平衡／穩定", "6": "領導／責任", "7": "表達／交際", "8": "累積／守成", "9": "洞察／表現"};
+const NUMBER_TRAITS={"1": {"good": "可從多角度思考，遇到變化時尋找替代方法。", "risk": "想法太多時可能延後決定；缺少時可練習先收集資訊。", "money": "大額支出前比較方案。"}, "2": {"good": "重視照顧、合作與家庭關係。", "risk": "可能過度配合；缺少時可練習聆聽。", "money": "共同支出先約定界線。"}, "3": {"good": "願意嘗試新方法並推動事情。", "risk": "可能太急；缺少時可練習主動開始。", "money": "新計畫先小規模測試。"}, "4": {"good": "重視交流與環境調整。", "risk": "可能過度迎合；缺少時可練習清楚表達。", "money": "合作條件寫清楚。"}, "5": {"good": "重視整體安排及資源平衡。", "risk": "可能過度控制；缺少時可建立固定節奏。", "money": "定期檢視收支比例。"}, "6": {"good": "重視責任、原則與決策。", "risk": "可能要求過高；缺少時可練習承擔決定。", "money": "設定財務責任及上限。"}, "7": {"good": "重視交流、愉快相處與分享。", "risk": "可能過度追求享受；缺少時可練習表達感受。", "money": "設定娛樂與人情預算。"}, "8": {"good": "重視耐性、穩定與長期累積。", "risk": "可能不易改變；缺少時可建立持續習慣。", "money": "固定儲蓄並保留現金。"}, "9": {"good": "重視觀察、熱情及表現。", "risk": "可能受情緒影響；缺少時可練習觀察與表達。", "money": "避免因熱門消息倉促決定。"}};
+const NUMBER_IMPROVE={"1": {"missing": "先查資料再決定。", "strong": "設定決策期限。"}, "2": {"missing": "主動詢問對方需要。", "strong": "保留自己的時間與預算。"}, "3": {"missing": "每天完成一件小事。", "strong": "先確認成本再行動。"}, "4": {"missing": "用一句話說明需求。", "strong": "不要為迎合他人改變預算。"}, "5": {"missing": "建立固定收支紀錄。", "strong": "保留調整空間。"}, "6": {"missing": "先完成一項固定責任。", "strong": "分工而非全部自己承擔。"}, "7": {"missing": "主動表達感受。", "strong": "先訂消費上限。"}, "8": {"missing": "從固定小額儲蓄開始。", "strong": "定期檢視資產流動性。"}, "9": {"missing": "寫下觀察與想法。", "strong": "重要決定隔天再確認。"}};
+const NUMBER_LINES=[{"code": "492", "name": "思考理解", "desc": "整理資訊與理解問題"}, {"code": "357", "name": "情緒感受", "desc": "表達感受與理解他人"}, {"code": "816", "name": "實務執行", "desc": "把計畫落實到日常"}, {"code": "438", "name": "規劃思考", "desc": "安排步驟與整合想法"}, {"code": "951", "name": "意志目標", "desc": "持續投入與維持方向"}, {"code": "276", "name": "行動合作", "desc": "主動行動與協調分工"}, {"code": "456", "name": "毅力", "desc": "遇到阻礙仍能持續調整"}, {"code": "258", "name": "同理平衡", "desc": "兼顧自身需求與他人感受"}];
+const LINE_PLAIN={"492": {"title": "思考理解", "full": "可多運用思考理解方面的特質。閱讀資料後先用自己的話整理重點，再確認有沒有遺漏。", "partial": "可進一步加強這方面的習慣。閱讀資料後先用自己的話整理重點，再確認有沒有遺漏。", "off": "建議從日常小事開始練習。閱讀資料後先用自己的話整理重點，再確認有沒有遺漏。", "empty": "這方面可透過後天習慣培養。閱讀資料後先用自己的話整理重點，再確認有沒有遺漏。"}, "357": {"title": "情緒感受", "full": "可多運用情緒感受方面的特質。遇到不舒服的事情，先說出自己的感受與需求。", "partial": "可進一步加強這方面的習慣。遇到不舒服的事情，先說出自己的感受與需求。", "off": "建議從日常小事開始練習。遇到不舒服的事情，先說出自己的感受與需求。", "empty": "這方面可透過後天習慣培養。遇到不舒服的事情，先說出自己的感受與需求。"}, "816": {"title": "實務執行", "full": "可多運用實務執行方面的特質。把計畫拆成每天能完成的小任務，定期檢查進度。", "partial": "可進一步加強這方面的習慣。把計畫拆成每天能完成的小任務，定期檢查進度。", "off": "建議從日常小事開始練習。把計畫拆成每天能完成的小任務，定期檢查進度。", "empty": "這方面可透過後天習慣培養。把計畫拆成每天能完成的小任務，定期檢查進度。"}, "438": {"title": "規劃思考", "full": "可多運用規劃思考方面的特質。開始前先列出步驟、所需資源和完成期限。", "partial": "可進一步加強這方面的習慣。開始前先列出步驟、所需資源和完成期限。", "off": "建議從日常小事開始練習。開始前先列出步驟、所需資源和完成期限。", "empty": "這方面可透過後天習慣培養。開始前先列出步驟、所需資源和完成期限。"}, "951": {"title": "意志目標", "full": "可多運用意志目標方面的特質。一次專注一個目標，為它設定明確的完成條件。", "partial": "可進一步加強這方面的習慣。一次專注一個目標，為它設定明確的完成條件。", "off": "建議從日常小事開始練習。一次專注一個目標，為它設定明確的完成條件。", "empty": "這方面可透過後天習慣培養。一次專注一個目標，為它設定明確的完成條件。"}, "276": {"title": "行動合作", "full": "可多運用行動合作方面的特質。合作前先確認分工，遇到問題主動提出解決方案。", "partial": "可進一步加強這方面的習慣。合作前先確認分工，遇到問題主動提出解決方案。", "off": "建議從日常小事開始練習。合作前先確認分工，遇到問題主動提出解決方案。", "empty": "這方面可透過後天習慣培養。合作前先確認分工，遇到問題主動提出解決方案。"}, "456": {"title": "毅力", "full": "可多運用毅力方面的特質。遇到阻礙時先縮小任務，維持固定節奏再逐步調整。", "partial": "可進一步加強這方面的習慣。遇到阻礙時先縮小任務，維持固定節奏再逐步調整。", "off": "建議從日常小事開始練習。遇到阻礙時先縮小任務，維持固定節奏再逐步調整。", "empty": "這方面可透過後天習慣培養。遇到阻礙時先縮小任務，維持固定節奏再逐步調整。"}, "258": {"title": "同理平衡", "full": "可多運用同理平衡方面的特質。做決定前同時確認自己的界線與對方的需求。", "partial": "可進一步加強這方面的習慣。做決定前同時確認自己的界線與對方的需求。", "off": "建議從日常小事開始練習。做決定前同時確認自己的界線與對方的需求。", "empty": "這方面可透過後天習慣培養。做決定前同時確認自己的界線與對方的需求。"}};
+function numberLineData(counts){return NUMBER_LINES.map(l=>{const nums=l.code.split('').map(Number),present=nums.filter(n=>counts[n]>0).length;return {...l,present,status:present===3?'full':present===0?'empty':present===2?'partial':'off'}})}
+function numberProfile(counts){const entries=[];for(let n=1;n<=9;n++)entries.push({n,c:counts[n]});const repeated=entries.filter(x=>x.c>=2).sort((a,b)=>b.c-a.c||a.n-b.n),missing=entries.filter(x=>x.c===0),single=entries.filter(x=>x.c===1),lines=numberLineData(counts);return {entries,repeated,missing,single,lines,fullLines:lines.filter(x=>x.status==='full'),partialLines:lines.filter(x=>x.status==='partial'),offLines:lines.filter(x=>x.status==='off'),emptyLines:lines.filter(x=>x.status==='empty')}}
+function numberPersonalityImproveData(counts){const p=numberProfile(counts),tips=[];p.missing.slice(0,4).forEach(x=>tips.push(`<b>缺 ${x.n}：</b>${NUMBER_IMPROVE[x.n].missing}`));p.repeated.slice(0,3).forEach(x=>tips.push(`<b>${x.n} 出現 ${x.c} 次：</b>${NUMBER_IMPROVE[x.n].strong}`));if(!tips.length)tips.push('數字分布較平均，改善重點放在固定回顧：每月檢查一次自己是否有某個特質被過度使用。');return uniqueTips(tips)}
+function numberFinanceData(c){const good=[],risk=[];for(const n of [8,5,6,7,1]){if(c[n])good.push(NUMBER_TRAITS[n].money);else risk.push(NUMBER_IMPROVE[n].missing);if(c[n]>=2)risk.push(NUMBER_IMPROVE[n].strong);}return {good:good.length?good:["可從固定預算與儲蓄開始。"],risk:risk.length?risk:["定期檢查收支。"]};}
+function numberFinanceImproveData(counts){return [8,5,6].map(n=>counts[n]?NUMBER_TRAITS[n].money:NUMBER_IMPROVE[n].missing);}
+function compatAnalysis(dateA,dateB){const a=birthdayDigitCounts(dateA),b=birthdayDigitCounts(dateB),shared=[],complement=[],bothMissing=[],friction=[];for(let n=1;n<=9;n++){if(a[n]>0&&b[n]>0)shared.push(n);if((a[n]===0&&b[n]>0)||(b[n]===0&&a[n]>0))complement.push(n);if(a[n]===0&&b[n]===0)bothMissing.push(n);if(a[n]>=2&&b[n]>=2)friction.push(n)}const type='九宮分布對照';return {a,b,shared,complement,bothMissing,friction,type}}
+function homeTopics(c,p,f){
+ const trait=i=>c[i]?NUMBER_TRAITS[i].good:NUMBER_IMPROVE[i].missing;
+ const advice=i=>c[i]>=2?NUMBER_IMPROVE[i].strong:!c[i]?NUMBER_IMPROVE[i].missing:NUMBER_TRAITS[i].money;
+return [['個性',`${(p.repeated.length?p.repeated:p.single).slice(0,2).map(v=>NUMBER_TRAITS[v.n].good).join(" ")}`,`${p.repeated.slice(0,2).map(v=>NUMBER_IMPROVE[v.n].strong).join(" ")} ${p.missing.slice(0,2).map(v=>NUMBER_IMPROVE[v.n].missing).join(" ")}`],['家庭',trait(6)+' '+trait(2),advice(6)],['感情',trait(2)+' '+trait(7),advice(2)],['婚姻',trait(6),advice(6)],['人際',trait(2)+' '+trait(7),'選擇守信、互惠的朋友；借貸與合作先說清楚。'+advice(2)],['工作',trait(3)+' '+trait(1),advice(3)],['事業',trait(6)+' '+trait(8),advice(8)],['財運',`${f.wealthExposed.length?'可留意較直接的收入來源。':'可著重建立穩定收入來源。'}${f.hiddenWealth.length?'也可探索不明顯的收入機會。':''}${f.vaultCount?'儲蓄與資產累積是值得關注的主題。':'聚財宜依靠固定儲蓄制度。'}`,numberFinanceImproveData(c).slice(0,2).join(' ')]];
+}
+function financeSummary(c){return "從累積、平衡與責任三個方向檢視財務習慣。";}
+return Object.freeze({label:"洛書九宮",meaning:n=>NUMBER_MEANING[n],trait:n=>NUMBER_TRAITS[n],improve:n=>NUMBER_IMPROVE[n],lineText:code=>LINE_PLAIN[code],numberLineData,numberProfile,numberPersonalityImproveData,numberFinanceData,numberFinanceImproveData,compatAnalysis,homeTopics,financeSummary});
+})();
+const nineEngine=()=>LoshuNine;
+
+fillTZ();
+yearFrom.value=new Date().getFullYear();yearTo.value=Math.min(2100,new Date().getFullYear()+9);
+try{
+ const raw=localStorage.getItem('hechongState');
+ if(raw){const saved=JSON.parse(raw);if(!saved||typeof saved!=='object'||Array.isArray(saved))throw new Error('Invalid saved data');
+ const allowed={};for(const key of ['birthDate','birthTime','tz','dayBoundary','yearFrom','yearTo','compatDate'])if(Object.hasOwn(saved,key))allowed[key]=saved[key];
+ applySaved(allowed);savedSnapshot=JSON.stringify(collect());updateSaveStatus();}
+}catch{saveMessage('無法讀取先前設定，請重新輸入並儲存。',true)}
+focusDate.value=localToday();flyingYear.value=new Date().getFullYear();recalc();renderFlying();
+if(document.getElementById('todayBtn'))todayBtn.addEventListener('click',()=>{focusDate.value=localToday();renderDaily();renderResponsive()});
+
+const mobileHomeMQ=matchMedia('(max-width:600px)');
+const homeActions=document.querySelector('.actions-wrap'), homeTop=document.querySelector('.topbar'), mobileActions=document.querySelector('.mobile-actions');
+function syncMobileHome(){const mobile=mobileHomeMQ.matches, active=document.querySelector('#home').classList.contains('active');document.querySelector('.main').classList.toggle('home-mobile',mobile&&active);(mobile&&active?mobileActions:homeTop).append(homeActions);saveBtn.textContent=mobile&&active?'儲存':'儲存到此瀏覽器';copyBtn.textContent=mobile&&active?'複製':'複製個人與今年摘要';printBtn.textContent='儲存 PDF';}
+function syncHomeDetails(){document.querySelector('.advanced-settings').open=!mobileHomeMQ.matches;document.querySelector('.natal-detail').open=!mobileHomeMQ.matches;syncMobileHome()}
+nav.addEventListener('click',()=>{syncMobileHome();if(mobileHomeMQ.matches)window.scrollTo(0,0)});mobileHomeMQ.addEventListener('change',syncHomeDetails);syncHomeDetails();
+
+function installDateParts(id){
+ const original=document.getElementById(id), field=original.parentElement;
+ field.classList.add('date-field');original.hidden=true;original.style.display='none';
+ const group=document.createElement('div');group.className='date-parts';group.setAttribute('role','group');group.setAttribute('aria-label',field.querySelector('label')?.textContent||'日期');
+ const parts=['年','月','日'].map((label,i)=>{const el=document.createElement('select');el.id=id+'Part'+i;el.setAttribute('aria-label',label);group.append(el);return el});
+ const [y,m,d]=parts; const optional=id==='compatDate';
+ function options(el,start,end,label,empty){el.replaceChildren();if(empty)el.add(new Option('選'+label,''));for(let n=start;n<=end;n++)el.add(new Option(n+label,String(n)));}
+ options(y,1900,2100,'年',optional);options(m,1,12,'月',optional);
+ function days(){const old=d.value;options(d,1,y.value&&m.value?new Date(+y.value,+m.value,0).getDate():31,'日',optional);if(old)d.value=String(Math.min(+old,d.options[d.options.length-1].value));}
+ function sync(){const a=original.value.split('-').map(Number);y.value=a[0]?String(a[0]):'';m.value=a[1]?String(a[1]):'';days();d.value=a[2]?String(a[2]):'';}
+ function change(){days();original.value=y.value&&m.value&&d.value?`${y.value}-${m.value.padStart(2,'0')}-${d.value.padStart(2,'0')}`:'';original.dispatchEvent(new Event('change',{bubbles:true}));}
+ parts.forEach(el=>el.addEventListener('change',change));original.after(group);field.querySelector('label')?.setAttribute('for',y.id);sync();
+ new MutationObserver(()=>parts.forEach(el=>el.setAttribute('aria-invalid',original.getAttribute('aria-invalid')||'false'))).observe(original,{attributes:true,attributeFilter:['aria-invalid']});
+ return sync;
+}
+const syncBirthParts=installDateParts('birthDate'),syncCompatParts=installDateParts('compatDate'),syncFocusParts=installDateParts('focusDate');
+todayBtn.addEventListener('click',syncFocusParts);
+</script>
+<div id="pdfReport"></div></body>
+</html>
